@@ -1,0 +1,2112 @@
+---
+title: "Health Sector Resources"
+author: "HABIMANA Martin"
+date: "2024-12-26"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+library(ggplot2)
+
+# Data preparation
+data <- data.frame(
+  Level = c("Primary Level", "Secondary Level", "Tertiary Level"),
+  Facilities = c(1914, 287, 25)
+)
+
+# Calculate percentages dynamically
+data <- data %>%
+  mutate(Percentage = round((Facilities / sum(Facilities)) * 100, 2))
+
+# Bar plot
+p <- ggplot(data, aes(x = Level, y = Facilities, fill = Level)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  # Add labels with dynamically calculated percentages
+  geom_text(
+    aes(
+      label = paste0(Facilities, " (", Percentage, "%)")
+    ),
+    vjust = -0.3, size = 3, color = "black", family = "sans"
+  ) +
+  # Custom fill colors
+  scale_fill_manual(
+    values = c("#4682B4", "#4682B4", "#4682B4"),
+    guide = "none"  # Remove legend
+  ) +
+  # Labels and styling
+  labs(
+    x = "\nLevel of Delivery",
+    y = "Number of Facilities(Percentage)",
+    caption = "Source: Health Management Information System (HMIS), 2024"
+  ) +
+  theme_minimal() +
+  theme(
+    legend.text = element_text(size = 12),
+    axis.line = element_line(color = "black", size = 0.4),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text = element_text(size = 12),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20),
+    plot.caption = element_text(family = "sans", size = 8, hjust = 0)
+  )
+
+print(p)
+```
+
+```{r}
+
+
+library(ggplot2)
+library(dplyr)
+
+# Data
+data <- data.frame(
+  Region = c("East", "Kigali City", "North", "South", "West"),
+  Facilities = c(498, 376, 409, 473, 471),
+  Total = 2227  # Grand total for all regions
+)
+
+# Calculate percentages
+data$Percentage <- round((data$Facilities / data$Total) * 100, 1)
+
+# Sort data by Facilities in descending order
+data <- data %>%
+  arrange(desc(Facilities))
+
+# Bar plot
+p <- ggplot(data, aes(x = reorder(Region, Facilities), y = Facilities, fill = Region)) +
+  geom_bar(stat = "identity", width = 0.6) +
+  geom_text(
+    aes(
+      label = paste0(Facilities, " (", Percentage, "%)")
+    ),
+    hjust = 1.1, size = 3, color = "white", family = "sans"
+  ) +
+  # Custom fill colors
+  scale_fill_manual(
+    values = c("#4682B4", "#4682B4", "#4682B4", "#4682B4", "#4682B4"),
+    guide = "none"  
+  ) +
+  # Flip the plot for horizontal bars
+  coord_flip() +
+  labs(
+    x = "Province",
+    y = "\nNumber of Facilities (%)",
+    caption = "Source: Health Management Information System (HMIS), 2024"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.line = element_line(color = "black", size = 0.4),
+    axis.title.x = element_text(size = 12, face = "bold"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text = element_text(size = 12),
+    plot.caption = element_text(size = 8, hjust = 0),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+# Display the plot
+
+print(p)
+```
+
+```{r}
+data <- data.frame(
+  Internet_Access_Type = c("Wireless Modem_MTN_Tigo", "Wired_Fixed Line_ADSL fibre", 
+                           "Wireless_WIMAX", "No internet connection", 
+                           "Satellite_VSAT"),
+  year_2023 = c(57.53, 17.49, 17.06, 3.24, 1.08),
+  year_2024 = c(61.12, 18.27, 18.52, 4.20, 1.48)
+)
+
+# Reshape data to long format for easier plotting
+data_long <- data %>%
+  pivot_longer(cols = c("year_2023", "year_2024"), names_to = "Year", values_to = "Percentage")
+
+# Create a horizontal bar plot with correctly positioned data labels and axis lines
+ggplot(data_long) +
+  geom_bar(aes(x = reorder(Internet_Access_Type, Percentage), y = Percentage, fill = Year), 
+           stat = "identity", position = position_dodge(width = 0.8)) +  # Bars dodged properly
+  geom_text(aes(x = reorder(Internet_Access_Type, Percentage), 
+                y = Percentage, 
+                label = paste0(round(Percentage, 2), "%"), 
+                group = Year), 
+            position = position_dodge(width = 0.8), vjust = 0.5, size = 3 , hjust=1, color = "black") +  # Positioning labels correctly
+  coord_flip() +  # Horizontal bar plot
+  labs(caption = "Source : HMIS",
+    x = "Internet Access Type", 
+    y = "Percentage (%)",
+    fill = "Year"
+  ) +
+  scale_fill_manual(values = c("year_2023" = "skyblue", "year_2024" = "#4682B4")) +
+  theme_minimal() +
+  theme(
+    text = element_text(family = "sans"),
+    axis.text = element_text(size = 10,family = "sans"),
+    axis.title = element_text(size = 10),
+    legend.text = element_text(size = 10,family = "sans"),
+    plot.caption = element_text(size = 10, family = "sans", hjust = 0),
+    axis.line = element_line(color = "black", size = 0.4),  # Adding axis lines
+    legend.position = "bottom"
+  )
+
+```
+
+Number of Ambulance
+
+```{r}
+library(sf)
+library(ggplot2)
+library(dplyr)
+library(ggplot2)
+library(dplyr)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(sf)
+
+
+data <- data.frame(
+  District = c("Bugesera","Gicumbi","Rutsiro","Burera", "Gakenke", "Gasabo", "Gatsibo", "Gisagara", "Huye", 
+               "Kamonyi", "Karongi", "Kayonza", "Kicukiro", "Kirehe", "Muhanga", 
+               "Musanze", "Ngoma", "Ngororero", "Nyamagabe", "Nyamasheke", 
+               "Nyabihu", "Nyagatare", "Nyanza", "Nyarugenge", "Nyaruguru", 
+               "Rubavu", "Ruhango", "Rulindo", "Rusizi", "Rwamagana"),
+  Number = c(16,15,12,13, 18, 41, 19, 14, 15, 8, 23, 17, 12, 16, 18, 14, 14, 17, 14, 
+             21, 13, 20, 10, 17, 11, 15, 18, 16, 22, 13)
+)
+
+shapefile_path <- "C:/Users/GK TECH/Downloads/rwa_adm2_2006_NISR_WGS1984_20181002.shp"
+shapefile_data <- st_read(shapefile_path)
+
+
+shapefile_data <- st_transform(shapefile_data, crs = 32736)
+map_data <- shapefile_data %>%
+  left_join(data, by = c("ADM2_EN" = "District")) 
+
+map_data$Label <- paste(map_data$ADM2_EN,"\n", map_data$Number)
+
+
+p <- ggplot(map_data) +
+  geom_sf(aes(fill = Number), color = "black", size = 0.2) +
+  geom_sf_text(aes(label = Label), size = 2, color = "white") + 
+  scale_fill_gradient(
+    low = "white", 
+    high = "#003366",  
+    name = "Number of Ambulances"
+  ) + 
+  theme_minimal() +
+  labs(caption = "Source: RBC - EMS Division, 2024") +
+  theme(
+    text = element_text(family = "sans"),
+    plot.title = element_text(size = 20, hjust = 0.3),
+    legend.position = c(1, 0),         
+    legend.justification = c(1, 0),    
+    legend.direction = "horizontal",  
+    legend.box = "horizontal",         # Align legend items horizontally
+    legend.title = element_text(size = 7, hjust = 0.5, vjust = 1), # Center align title below scale
+    legend.key.size = unit(0.4, "cm"),
+    panel.grid = element_blank(),     
+    plot.caption = element_text(
+      family = "sans", size = 8, hjust = 0.1
+    ),legend.box.margin = margin(t = 20, r = 20, b = 53, l = 0, unit = "pt"), 
+    axis.text = element_blank(),       
+    axis.ticks = element_blank(),      
+    axis.title = element_blank()
+  ) +
+  guides(
+    fill = guide_colourbar(
+      title.position = "bottom",       # Move title below the legend scale
+      title.hjust =0.5,
+      # Center-align the title
+      barheight = unit(0.3, "cm"),     # Adjust scale height
+      barwidth = unit(4, "cm") 
+      # Center-align the title
+    )
+  )
+
+print(p)
+
+ggsave("C:/Users/GK TECH/Desktop/PNG_Graphs/Number_of_ambulances.png", plot = p, width = 6, height = 4, dpi = 300)
+
+```
+
+
+```{r}
+# Load libraries
+library(sf)
+library(ggplot2)
+library(dplyr)
+
+# Define data for private facilities by district
+facilities_data <- data.frame(
+  District = c("Bugesera", "Burera", "Gakenke", "Gasabo", "Gatsibo", "Gicumbi", 
+               "Gisagara", "Huye", "Kamonyi", "Karongi", "Kayonza", "Kicukiro", 
+               "Kirehe", "Muhanga", "Musanze", "Ngoma", "Ngororero", "Nyabihu", 
+               "Nyagatare", "Nyamagabe", "Nyamasheke", "Nyanza", "Nyarugenge", 
+               "Nyaruguru", "Rubavu", "Ruhango", "Rulindo", "Rusizi", "Rutsiro", "Rwamagana"),
+  Private = c(8, 1, 1, 102, 5, 2, 1, 6, 5, 3, 7, 56, 2, 7, 13, 2, 1, 2, 14, 1, 
+              3, 2, 65, 2, 18, 5, 2, 11, 0, 8)
+)
+
+# Load and prepare shapefile data
+shapefile_path <- "C:/Users/GK TECH/Downloads/rwa_adm2_2006_NISR_WGS1984_20181002.shp"
+shapefile_data <- st_read(shapefile_path)
+
+# Transform CRS to match the required projection
+shapefile_data <- st_transform(shapefile_data, crs = 32736)
+
+# Join facilities data with shapefile data
+map_data <- shapefile_data %>%
+  left_join(facilities_data, by = c("ADM2_EN" = "District"))
+
+map_data$Label <- paste(map_data$ADM2_EN, "\n", map_data$Private)
+
+# Plot map for private facilities
+p_private <- ggplot(map_data) +
+  geom_sf(aes(fill = Private), color = "black", size = 0.2) +
+  geom_sf_text(aes(label = Label), size = 1.9, color = "black") +  # Adjust label size
+  scale_fill_gradient(
+    low = "white", 
+    high = "#003366",  
+    name = "Private Health Facilities"
+  ) + 
+  theme_minimal() +
+  labs(
+    caption = "Source: Health Management Information System, 2024",
+  ) +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5),
+    axis.text = element_blank(),
+    legend.position = c(1, 0),
+    axis.ticks = element_blank(),
+    legend.key.size = unit(0.6, "cm"),
+    legend.justification = c(1, 0),    
+    legend.direction = "horizontal",  
+    legend.title = element_text(size = 7, hjust = 0.5, vjust = 1),
+     plot.caption = element_text(
+      family = "sans", size = 6, hjust = 0
+    ),
+      panel.grid = element_blank(), 
+    legend.box.margin = margin(t = 20, r = 20, b = 53, l = 0, unit = "pt"),
+    legend.box = "horizontal",
+    axis.title = element_blank()
+  ) +
+  guides(
+    fill = guide_colourbar(
+      title.position = "bottom",       # Move title below the legend scale
+      title.hjust =0.5,
+      # Center-align the title
+      barheight = unit(0.3, "cm"),     # Adjust scale height
+      barwidth = unit(4, "cm") 
+      # Center-align the title
+    )
+  )
+
+# Save the plot with larger dimensions
+ggsave("C:/Users/GK TECH/Desktop/PNG_Graphs/Private_Health_Facilities_Map_Larger.png", plot = p_private, width = 8, height = 6, dpi = 300)
+
+# Print the plot
+print(p_private)
+
+```
+Public
+
+```{r}
+# Load libraries
+library(sf)
+library(ggplot2)
+library(dplyr)
+
+# Define data for public facilities by district
+facilities_data <- data.frame(
+  District = c("Bugesera", "Burera", "Gakenke", "Gasabo", "Gatsibo", "Gicumbi", 
+               "Gisagara", "Huye", "Kamonyi", "Karongi", "Kayonza", "Kicukiro", 
+               "Kirehe", "Muhanga", "Musanze", "Ngoma", "Ngororero", "Nyabihu", 
+               "Nyagatare", "Nyamagabe", "Nyamasheke", "Nyanza", "Nyarugenge", 
+               "Nyaruguru", "Rubavu", "Ruhango", "Rulindo", "Rusizi", "Rutsiro", "Rwamagana"),
+ Public = c(75, 79, 92, 66, 60, 101, 64, 55, 60, 67, 54, 35, 62, 44, 55, 42, 57, 
+             51, 106, 65, 74, 52, 51, 54, 49, 50, 63, 77, 58, 53)
+)
+
+# Load and prepare shapefile data
+shapefile_path <- "C:/Users/GK TECH/Downloads/rwa_adm2_2006_NISR_WGS1984_20181002.shp"
+shapefile_data <- st_read(shapefile_path)
+
+# Transform CRS to match the required projection
+shapefile_data <- st_transform(shapefile_data, crs = 32736)
+
+# Join facilities data with shapefile data
+map_data <- shapefile_data %>%
+  left_join(facilities_data, by = c("ADM2_EN" = "District"))
+
+# Create custom label combining district name and public facilities number
+map_data$Label <- paste(map_data$ADM2_EN, "\n", map_data$Public)
+
+# Plot map for public facilities with fixed scale from 0 to 100
+p_public <- ggplot(map_data) +
+  geom_sf(aes(fill = Public), color = "black", size = 0.2) +
+  geom_sf_text(aes(label = Label), size = 1.9, color = "black") +  # Adjust label size
+  scale_fill_gradient(
+    low = "white", 
+    high = "#003366",  
+    name = "Public Health Facilities",
+    breaks = c(0, 25, 50, 75, 100),  # Specify exact breaks for the color scale
+    labels = c("0", "25", "50", "75", "100")  # Labeling the breaks
+  ) + 
+  theme_minimal() +
+  labs(
+    caption = "Source: Health Management Information System, 2024",
+  ) +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5),
+    axis.text = element_blank(),
+    legend.position = c(1, 0),
+    axis.ticks = element_blank(),
+    legend.key.size = unit(0.6, "cm"),
+    legend.justification = c(1, 0),    
+    legend.direction = "horizontal",  
+    legend.title = element_text(size = 7, hjust = 0.5, vjust = 1),
+    plot.caption = element_text(
+      family = "sans", size = 6, hjust = 0
+    ),
+    panel.grid = element_blank(), 
+    legend.box.margin = margin(t = 20, r = 20, b = 53, l = 0, unit = "pt"),
+    legend.box = "horizontal",
+    axis.title = element_blank()
+  ) +
+  guides(
+    fill = guide_colourbar(
+      title.position = "bottom",       # Move title below the legend scale
+      title.hjust = 0.5,
+      barheight = unit(0.3, "cm"),     # Adjust scale height
+      barwidth = unit(4, "cm") 
+    )
+  )
+
+# Save the plot with larger dimensions
+ggsave("C:/Users/GK TECH/Desktop/PNG_Graphs/Public_Health_Facilities_Map_Larger.png", plot = p_public, width = 8, height = 6, dpi = 300)
+
+# Print the plot
+print(p_public)
+
+
+```
+
+```{r}
+# Load the ggplot2 package
+library(ggplot2)
+
+# Create the data frame
+data <- data.frame(
+  Type = c("Digital Clinic", "Dispensary", "District Hospital", "General Clinic", 
+           "Health Center", "Health Post", "Laboratory", "Level Two Teaching Hospital", 
+           "Medicalized health Center", "Paramedical Clinic", "Polyclinic", 
+           "Prison Clinic", "Private Hospital", "Provincial Hospital", "Referral Hospital", 
+           "Specialized Clinic", "Specialized Hospital"),
+  Count = c(1, 113, 34, 127, 508, 1280, 3, 9, 10, 27, 31, 13, 4, 3, 6, 43, 14)
+)
+
+# Calculate the total count
+total_count <- sum(data$Count)
+
+# Calculate the percentage for each facility type
+data$Percentage <- (data$Count / total_count) * 100
+
+# Sort the data by Count in ascending order
+data_sorted <- data[order(data$Count),]
+
+# Create a column to specify label position
+data_sorted$Label_Position <- ifelse(data_sorted$Type == "Health Post", "inside", "outside")
+
+# Create the horizontal bar plot with customized label positions
+ggplot(data_sorted, aes(x = Count, y = reorder(Type, Count), fill = Count)) +
+  geom_bar(stat = "identity") +
+  # Adding data labels with condition for inside/outside positioning
+  geom_text(aes(
+    label = paste(Count, "(", round(Percentage, 2), "%)", sep = ""),
+    hjust = ifelse(Label_Position == "inside", 1, -0.1),  # Inside for "Health Post", outside for others
+    vjust = ifelse(Label_Position == "inside", 0.5, 0.5)   # Vertically centered for inside, outside for others
+  ), 
+  size = 3, color = ifelse(data_sorted$Label_Position == "inside", "white", "black")) +  # White text inside for "Health Post", black for others
+  scale_fill_gradient(low = "#a6c8ff", high = "#004a99") +  # Light blue to dark blue gradient
+  theme_minimal() +
+  labs(
+    x = "\nNumber of Facility", 
+    y = "Health Facility Type",
+    caption = "Source: Health Information Management System (HMIS), 2024"
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text.y = element_text(size = 10, family = "sans"),
+    plot.caption = element_text(size = 8, hjust = 0, family = "sans"),
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+
+
+
+```
+
+Transport
+EMS 
+
+Incident by Months
+```{r}
+# Data
+months <- c('Jul-2023', 'Aug-2023', 'Sep-2023', 'Oct-2023', 'Nov-2023', 'Dec-2023', 
+            'Jan-2024', 'Feb-2024', 'Mar-2024', 'Apr-2024', 'May-2024', 'Jun-2024')
+incidents <- c(949, 1038, 1437, 1544, 1627, 1787, 1680, 1715, 1946, 1900, 1855, 1830)
+
+library(ggplot2)
+ggplot(data.frame(months, incidents), aes(x=months, y=incidents)) +
+  geom_bar(stat="identity", fill= "#004a99", width=0.7) +
+  geom_text(aes(label=incidents), vjust=-0.3, size=3, family="sans") +
+  labs(x="Month", y="Incident", caption = "Source: EMS Fleet Management System") +
+  theme_minimal(base_size=22, base_family="sans") +
+  theme(
+    axis.title.x = element_text(size=12),
+    axis.title.y = element_text(size=12),
+    axis.text = element_text(size=9),
+    legend.position = "bottom",
+    panel.grid.major = element_blank(),  
+    panel.grid.minor = element_blank(),   
+  plot.caption = element_text(size = 8, family = "sans", hjust = 0),
+    axis.line = element_line(color = "black", size = 0.4),  
+    ) +
+  scale_x_discrete(labels=months) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+
+
+```
+
+Distribution of SAMU responses per hour (24 hours format). Source: EMS Fleet Management System
+```{r}
+library(readxl)
+
+data_ems <- read_excel("C:/Users/GK TECH/Downloads/EMS.xlsx")
+
+data_ems$HOUR <- hms::as_hms(data_ems$HOUR)
+
+# Step 2: Extract the hour from the 'HOUR' column
+data_ems$hour_of_incident <- hour(data_ems$HOUR)
+
+filtered_data <- data_ems %>%
+  filter(!is.na(HOUR))  # Remove rows where the 'HOUR' value is NA
+
+# Extract the hour from the 'HOUR' column
+filtered_data$hour_of_incident <- hour(filtered_data$HOUR)
+
+# Aggregate the data by 'hour_of_incident'
+aggregated_data <- filtered_data %>%
+  group_by(hour_of_incident) %>%
+  summarise(
+    total_incidents = n()  # Count the number of incidents in each hour
+  )
+
+# Create a sequence of all hours (0 to 23)
+all_hours <- data.frame(hour_of_incident = 0:23)
+
+# Ensure all hours are included by joining with the full sequence
+complete_data <- all_hours %>%
+  left_join(aggregated_data, by = "hour_of_incident") %>%
+  replace_na(list(total_incidents = 0))  # Fill missing hours with 0 incidents
+
+# View the complete data
+print(complete_data)
+
+# Create a bar plot
+ggplot(complete_data, aes(x = factor(hour_of_incident), y = total_incidents)) +
+  geom_bar(stat = "identity", fill = "#004a99", color = "black", width = 0.7) + # Bar plot
+  geom_text(aes(label = total_incidents), vjust = -0.3, size = 3, family = "sans") + # Data labels
+  labs(
+    x = "\nHour of the day (24 hours format)",
+    y = "Total Incidents",
+    caption = "Source: EMS Fleet Management System"
+  ) +
+  scale_x_discrete(labels = as.character(0:23)) + # Ensure all hours (0-23) are shown
+  theme_minimal(base_size = 15) +                # Minimal theme with increased base font size
+  theme(
+    axis.text = element_text(size = 12),         # Customize axis text size
+    axis.title = element_text(size = 12),        # Customize axis title size
+    plot.title = element_text(size = 16, hjust = 0.5),
+    plot.caption = element_text(size = 9, family = "sans", hjust = 0),
+    axis.line = element_line(color = "black", size = 0.4)  # Adding axis lines
+  )
+
+```
+Alternatively
+
+```{r}
+# Your data
+data_ems <- data.frame(
+  hour_of_incident = c("12 AM", "1 AM", "2 AM", "3 AM", "4 AM", "5 AM", "6 AM", "7 AM", "8 AM", "9 AM", "10 AM", "11 AM", 
+                       "12 PM", "1 PM", "2 PM", "3 PM", "4 PM", "5 PM", "6 PM", "7 PM", "8 PM", "9 PM", "10 PM", "11 PM"),
+  total_incidents = c(983, 865, 745, 565, 520, 627, 723, 1086, 1339, 1435, 1475,1477, 1414,1399, 1417,1441,1228, 1437, 2060, 1966, 1702, 1585, 1468,1193)
+)
+
+# Reorder the data to start from 6 AM
+data_ems$hour_of_incident <- factor(data_ems$hour_of_incident, levels = c("6 AM", "7 AM", "8 AM", "9 AM", "10 AM", "11 AM", "12 PM", "1 PM", "2 PM", 
+                                                                           "3 PM", "4 PM", "5 PM", "6 PM", "7 PM", "8 PM", "9 PM", "10 PM", 
+                                                                           "11 PM", "12 AM", "1 AM", "2 AM", "3 AM", "4 AM", "5 AM"))
+
+# Create the bar plot
+inci<-ggplot(data_ems, aes(x = hour_of_incident, y = total_incidents)) +
+  geom_bar(stat = "identity", fill = "#004a99", width = 0.7) +
+  geom_text(aes(label = total_incidents), vjust = -0.3, size = 2.2, family = "sans") +
+  labs(
+    x = "\nHour of the Day",
+    y = "Total Incidents",
+    caption = "Source: EMS Fleet Management System"
+  ) +
+  theme_minimal(base_size = 15) +
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
+    axis.text = element_text(size = 8),
+    axis.title = element_text(size = 10),
+    plot.title = element_text(size = 16, hjust = 0.5),
+    plot.caption = element_text(size = 8, hjust = 0),
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+
+print(inci)
+ggsave("C:/Users/GK TECH/Desktop/PNG_Graphs/IncidentsPerHours.png", plot = inci, width = 6, height = 4, dpi = 300)
+```
+
+Overview of cases managed by SAMU. Source: EMS Fleet Management System.
+
+```{r}
+
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Data
+incident_data <- data.frame(
+  Category = c( "Internal Medicine", "Obstetric/Gynecology", "Other", "Pediatric", "Trauma"),
+  Count = c( 4302, 2952, 50, 1067, 10937)
+)
+
+# Calculate the total count and percentage
+incident_data <- incident_data %>%
+  mutate(
+    Percentage = (Count / sum(Count)) * 100,  # Calculate percentage
+    Label = paste0(Count, " \n", round(Percentage, 0), "%")  # Create combined label
+  ) %>%
+  arrange(desc(Count))  # Sort data by Count in descending order
+
+# Create a horizontal bar plot
+ggplot(incident_data, aes(x = reorder(Category, Count), y = Count)) +
+  geom_bar(stat = "identity", fill = "lightblue", width = 0.5) +
+  geom_text(aes(label = Label), hjust = 0, size = 3, family = "sans") + # Add data labels with percentages
+  coord_flip() +  # Flip the coordinates for horizontal bars
+  labs(
+    x = "Event Type",
+    y = "Incident Count",
+    caption = "Source: EMS Database"
+  ) +
+  theme_minimal(base_size = 15) +                  # Minimal theme
+  theme(
+    axis.text = element_text(size = 12),           # Customize axis text size
+    axis.title = element_text(size = 12),
+    plot.title = element_text(size = 16, hjust = 0.5),
+    plot.caption = element_text(size = 8, hjust = 0),
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+
+
+```
+
+
+```{r}
+library(sf)
+library(ggplot2)
+library(dplyr)
+library(ggplot2)
+library(dplyr)
+library(sf)
+
+data <- data.frame(
+  District = c("Bugesera","Gicumbi","Rutsiro","Burera", "Gakenke", "Gasabo", "Gatsibo", "Gisagara", "Huye", 
+               "Kamonyi", "Karongi", "Kayonza", "Kicukiro", "Kirehe", "Muhanga", 
+               "Musanze", "Ngoma", "Ngororero", "Nyamagabe", "Nyamasheke", 
+               "Nyabihu", "Nyagatare", "Nyanza", "Nyarugenge", "Nyaruguru", 
+               "Rubavu", "Ruhango", "Rulindo", "Rusizi", "Rwamagana"),
+  Number = c(16,15,12,13, 18, 41, 19, 14, 15, 8, 23, 17, 12, 16, 18, 14, 14, 17, 14, 
+             21, 13, 20, 10, 17, 11, 15, 18, 16, 22, 13)
+)
+
+shapefile_path <- "C:/Users/GK TECH/Downloads/rwa_adm2_2006_NISR_WGS1984_20181002.shp"
+shapefile_data <- st_read(shapefile_path)
+
+
+shapefile_data <- st_transform(shapefile_data, crs = 32736)
+map_data <- shapefile_data %>%
+  left_join(data, by = c("ADM2_EN" = "District")) 
+
+map_data$Label <- paste(map_data$ADM2_EN,"\n", map_data$Number)
+
+
+p <- ggplot(map_data) +
+  geom_sf(aes(fill = Number), color = "black", size = 0.2) +
+  geom_sf_text(aes(label = Label), size = 2, color = "white") + 
+  scale_fill_gradient(
+    low = "lightblue", 
+    high = "#003366",  
+    name = "Number of Ambulances"
+  ) + 
+  theme_minimal() +
+  labs(caption = "Source: RBC - EMS Division, 2024") +
+  theme(
+    text = element_text(family = "sans"),
+    plot.title = element_text(size = 20, hjust = 0.3),
+    legend.position = c(1, 0),         
+    legend.justification = c(1, 0),    
+    legend.direction = "horizontal",  
+    legend.box = "horizontal",         # Align legend items horizontally
+    legend.title = element_text(size = 7, hjust = 0.5, vjust = 1), # Center align title below scale
+    legend.key.size = unit(0.4, "cm"),
+    panel.grid = element_blank(),     
+    plot.caption = element_text(
+      family = "sans", size = 8, hjust = 0.1
+    ),legend.box.margin = margin(t = 20, r = 20, b = 53, l = 0, unit = "pt"), 
+    axis.text = element_blank(), 
+    axis.ticks = element_blank(),      
+    axis.title = element_blank()
+  ) +
+  guides(
+    fill = guide_colourbar(
+      title.position = "bottom",       # Move title below the legend scale
+      title.hjust =0.5,
+      # Center-align the title
+      barheight = unit(0.3, "cm"),     # Adjust scale height
+      barwidth = unit(4, "cm") 
+      # Center-align the title
+    )
+  )
+
+print(p)
+
+ggsave("C:/Users/GK TECH/Desktop/PNG_Graphs/Number_of_ambulances.png", plot = p, width = 6, height = 4, dpi = 300)
+
+```
+Response time
+
+```{r}
+data_ems <- read_excel("C:/Users/GK TECH/Downloads/EMS.xlsx")
+average_response<-mean(data_ems$ResponseTime, na.rm = TRUE)
+average_response
+```
+
+Average response time by Month and including all month of year 2024
+```{r}
+data_ems <- read_excel("C:/Users/GK TECH/Downloads/EMS.xlsx")
+average_response_by_month <- data_ems %>%
+  group_by(Month,Year) %>%
+  summarise(
+    avg_response_time_minutes = mean(ResponseTime, na.rm = TRUE)  
+  )
+
+print(average_response_by_month)
+
+#write_xlsx(average_response_by_month,"C:/Users/GK TECH/Desktop/average_response_by_month.xlsx")
+
+```
+
+Average response time by Year
+```{r}
+data_ems <- read_excel("C:/Users/GK TECH/Downloads/EMS.xlsx")
+average_response_by_year <- data_ems %>%
+  group_by(Year) %>%
+  summarise(
+    avg_response_time_minutes = mean(ResponseTime, na.rm = TRUE)  
+  )
+
+print(average_response_by_year)
+```
+
+Average Response time
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(lubridate)
+
+# Example data
+average_response_by_month <- data.frame(
+  Month = 1:12,
+  avg_response_time_minutes = c(20.03073, 20.61376, 15.40376, 13.95087, 15.37177, 15.76416,15.35837, 15.84610, 16.70118, 15.68165, 16.74248, 17.01604
+                                )
+)
+
+# Create a 'Month_Year' column to represent the month and year
+average_response_by_month$Month_Year <- factor(
+  1:12,  # From 1 to 12
+  levels = 1:12,  # Keep months ordered
+  labels = c("Jul-2023", "Aug-2023", "Sep-2023", "Oct-2023", "Nov-2023", "Dec-2023", 
+             "Jan-2024", "Feb-2024", "Mar-2024", "Apr-2024", "May-2024", "Jun-2024")
+)
+
+# Create the line plot with y-axis starting from 0
+p <- ggplot(average_response_by_month, aes(x = Month_Year, y = avg_response_time_minutes)) +
+  geom_line(color = "#004a99", size = 1, group = 1) +  # Make sure line is visible
+  geom_point(color = "black", size = 2) +    # Add points at each month
+  geom_text(aes(label = round(avg_response_time_minutes, 2)), vjust = -1, hjust = 0.5, size = 3.5, family = "sans") +  # Data labels
+  labs(
+    x = "Month-Year",
+    y = "Average Response Time (minutes)",
+    caption = "Source: EMS Fleet Management System"
+  ) +
+  scale_y_continuous(limits = c(0, max(average_response_by_month$avg_response_time_minutes) + 5)) +  # Set y-axis to start from 0
+  theme_minimal(base_size = 15) +   
+  theme(
+    axis.text = element_text(size = 10),          # Customize axis text size
+    axis.title = element_text(size = 12),         # Customize axis title size
+    plot.title = element_text(size = 12, hjust = 0.5),   # Style plot title
+    plot.caption = element_text(size = 10, hjust = 0),  # Style caption
+    axis.line = element_line(color = "black", size = 0.4),  # Adding axis lines
+    axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels for readability
+  )
+
+# Print the plot
+print(p)
+```
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Define the updated dataset
+average_response_by_month <- data.frame(
+  Month = c(7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12),
+  Year = c(2023, 2023, 2023, 2023, 2023, 2023, 2024, 2024, 2024, 2024, 2024, 2024, 2024, 2024, 2024, 2024, 2024, 2024),
+  avg_response_time_minutes = c(
+    20.03072626, 20.61375661, 15.40375587, 13.95086505, 15.37176938, 15.76415681,
+    15.35836627, 15.84610347, 16.70117647, 15.68165025, 16.74247894, 17.01603948,
+    18.14262295, 17.65138653, 18.31361676, 19.70484581, 19.20452937, 19.0308642
+  )
+)
+
+# Create a Month-Year column with abbreviated month names
+average_response_by_month <- average_response_by_month %>%
+  mutate(Month_Year = paste(month.abb[Month], Year, sep = "-")) %>%
+  arrange(Year, Month)  # Ensure data is sorted correctly
+
+# Explicitly set the Month_Year as a factor with levels in the correct order
+month_year_order <- unique(average_response_by_month$Month_Year)
+average_response_by_month$Month_Year <- factor(average_response_by_month$Month_Year, levels = month_year_order)
+
+# Create the plot
+p <- ggplot(average_response_by_month, aes(x = Month_Year, y = avg_response_time_minutes, group = 1)) +
+  geom_line(color = "#004a99", size = 1) +  # Line plot
+  geom_point(color = "black", size = 2) +  # Points at each data point
+  geom_text(
+    aes(label = round(avg_response_time_minutes, 2)),
+    vjust = -0.9, size = 3, family = "sans"
+  ) +  # Data labels for each point
+  geom_vline(xintercept = which(average_response_by_month$Month_Year == "Jan-2024"), 
+             color = "black", linetype = "dashed", size = 1) +  # Vertical line at Jan-2024
+  annotate("text", x = 6, y = max(average_response_by_month$avg_response_time_minutes) + 2, 
+           label = "2023", size = 4,color="darkblue", hjust = 0.5) +  # Year 2023 label above
+  annotate("text", x = 13, y = max(average_response_by_month$avg_response_time_minutes) + 2, 
+           label = "2024", size = 4,color="darkblue", hjust = 0.5) +  # Year 2024 label above
+  labs(
+    x = "Month-Year",
+    y = "Average Response Time (minutes)",
+    caption = "Source: EMS Fleet Management System"
+  ) +
+  scale_y_continuous(
+    limits = c(0, max(average_response_by_month$avg_response_time_minutes) + 5)
+  ) +  # Adjust y-axis range
+  theme_minimal(base_size = 15) +  # Minimal theme with custom base size
+  theme(axis.line = element_line(color = "black", size = 0.4),
+        axis.text = element_text(size = 9),  # Customize axis text size
+        axis.title = element_text(size = 12),  # Customize axis title size
+        plot.title = element_text(size = 12, hjust = 0.5),  # Style plot title
+        plot.caption = element_text(size = 9, hjust = 0),  # Style caption
+        axis.text.x = element_text(angle = 45, hjust = 1)  # Rotate x-axis labels
+  )
+
+# Display the plot
+print(p)
+
+# Save the plot
+ggsave(
+  filename = "C:/Users/GK TECH/Desktop/PNG_Graphs/ResponseTime_LinePlot_WithLabels.png",
+  plot = p,
+  width = 10, height = 6, dpi = 300
+)
+
+
+
+```
+
+```{r}
+# Load required libraries
+library(readxl)
+library(ggplot2)
+library(dplyr)
+
+# Load data
+data_ems <- read_excel("C:/Users/GK TECH/Downloads/EMS.xlsx")
+
+# Group and summarize incidents by district, calculate percentages
+district_incidents <- data_ems %>%
+  group_by(EVENT_DISTRICT) %>%
+  summarise(total_incidents = n()) %>%
+  mutate(percentage = total_incidents / sum(total_incidents) * 100)
+
+# Horizontal bar chart of incidents by district with labels
+ggplot(district_incidents, aes(x = reorder(EVENT_DISTRICT, total_incidents), y = total_incidents)) +
+  geom_bar(stat = "identity", fill = "purple", color = "black") +
+  geom_text(aes(label = paste0(total_incidents, " (", round(percentage, 1), "%)")), 
+            hjust = -0.1, size = 5, family = "sans") +  # Add labels with percentages
+  labs(
+    title = "Incidents by Event District",
+    x = "District",
+    y = "Number of Incidents"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.y = element_text(size = 10),  # Customize y-axis text
+    axis.title.x = element_text(size = 14),
+    axis.title.y = element_text(size = 14),
+    plot.title = element_text(size = 16, face = "bold", hjust = 0.5)
+  ) +
+  coord_flip()  # Make the bar chart horizontal
+
+
+```
+
+
+```{r}
+library(sf)
+library(ggplot2)
+library(dplyr)
+library(stringr)
+
+incidents_raw <- data.frame(
+  District = c("BUGESERA", "Bugesera", "Burera", "GASABO", "GATSIBO", "GAsabo", "GICUMBI", 
+               "Gakenke", "Gasabo", "Gatsibo", "Gicumbi", "Gisagara", "HUYE", "Huye", 
+               "KAYONZA", "KIREHE", "Kamonyi", "Karongi", "Kayonza", "Kicukiro", "Kirehe", 
+               "MUHANGA", "MUSANZE", "Muhanga", "Musanze", "NGOMA", "NYABIHU", "NYAGATARE", 
+               "NYANZA", "Ngoma", "Ngororero", "Nyabihu", "Nyagatare", "Nyamagabe", 
+               "Nyamasheke", "Nyanza", "Nyarugenge", "Nyaruguru", "RUBAVU", "RUSIZI", 
+               "RUTSIRO", "Rubavu", "Ruhango", "Rulindo", "Rusizi", "Rutsiro", "Rwamagana", 
+               "bugesera", "gasabo", "gicumbi", "huye", "karongi", "kayonza", "kirehe", 
+               "musanze", "ngororero", "nyagatare", "nyanza", "rusizi", "rwamagana", "NA"),
+  Incidents = c(85, 2, 8, 2, 1, 1, 1, 34, 6782, 32, 33, 9, 2, 73, 2, 2, 875, 41, 29, 5268, 
+                19, 3, 1, 53, 97, 2, 2, 1, 2, 25, 19, 11, 34, 40, 28, 39, 5335, 18, 1, 2, 
+                1, 65, 16, 39, 16, 20, 113, 1, 1, 1, 6, 1, 2, 1, 1, 1, 1, 1, 4, 2, 1)
+)
+
+#Clean and aggregate the data
+incidents_clean <- incidents_raw %>%
+  mutate(District = str_to_title(District)) %>% # Standardize district names
+  group_by(District) %>%                       # Group by district
+  summarise(Total_Incidents = sum(Incidents, na.rm = TRUE)) # Sum incidents per district
+
+# Load shapefile
+shapefile_path <- "C:/Users/GK TECH/Downloads/rwa_adm2_2006_NISR_WGS1984_20181002.shp"
+shapefile_data <- st_read(shapefile_path)
+
+# Ensure CRS is consistent for mapping
+shapefile_data <- st_transform(shapefile_data, crs = 32736)
+
+map_data <- shapefile_data %>%
+  left_join(incidents_clean, by = c("ADM2_EN" = "District"))
+
+map_data$Label <- paste(map_data$ADM2_EN,map_data$Total_Incidents)
+
+p_incidents <- ggplot(map_data) +
+  geom_sf(aes(fill = Total_Incidents), color = "black", size = 0.2) +
+  geom_sf_text(aes(label = Label), size = 2, color = "black") + # District labels
+  scale_fill_gradient(
+    low = "white", 
+    high = "#004a99",  # Color scale from white to blue
+    name = "Incidents Count",
+    na.value = "gray90"  # Color for districts with no data
+  ) +
+  theme_minimal() +
+  labs(
+    caption = "Source: EMS, 2024"
+  ) +
+  theme(
+    axis.text = element_blank(),
+    legend.position = c(1, 0),
+    axis.ticks = element_blank(),
+    legend.key.size = unit(0.6, "cm"),
+    legend.justification = c(1, 0),    
+    legend.direction = "horizontal",  
+    legend.title = element_text(size = 9, hjust = 0.5, vjust = 1),
+     plot.caption = element_text(
+      family = "sans", size = 7, hjust = 0
+    ),
+      panel.grid = element_blank(), 
+    legend.box.margin = margin(t = 20, r = 20, b = 53, l = 0, unit = "pt"),
+    legend.box = "horizontal",
+    legend.text = element_text(size= 7),
+    axis.title = element_blank()
+  ) +
+  guides(
+    fill = guide_colourbar(
+      title.position = "bottom",       # Move title below the legend scale
+      title.hjust =0.5,
+      barheight = unit(0.4, "cm"),     # Adjust scale height
+      barwidth = unit(4, "cm") 
+    )
+  )
+
+print(p_incidents)
+
+```
+
+
+
+Hospitalization
+
+Figure Total Admission by districts
+```{r}
+# Load necessary libraries
+library(sf)
+library(tidyverse)
+
+# Define data for the provided counts by district
+district_data <- data.frame(
+  District = c("Bugesera", "Burera", "Gakenke", "Gasabo", "Gatsibo", "Gicumbi", 
+               "Gisagara", "Huye", "Kamonyi", "Karongi", "Kayonza", "Kicukiro", 
+               "Kirehe", "Muhanga", "Musanze", "Ngoma", "Ngororero", "Nyabihu", 
+               "Nyagatare", "Nyamagabe", "Nyamasheke", "Nyanza", "Nyarugenge", 
+               "Nyaruguru", "Rubavu", "Ruhango", "Rulindo", "Rusizi", "Rutsiro", "Rwamagana"),
+  Count = c(29570, 32726, 24560, 86712, 35800, 21739, 24888, 57493, 23434, 34274, 
+            21609, 99203, 23468, 42900, 33836, 19770, 21703, 17346, 35459, 18203, 
+            28019, 20237, 88373, 12727, 34520, 22160, 16765, 34206, 24573, 21205)
+)
+
+shapefile_path <- "C:/Users/GK TECH/Downloads/rwa_adm2_2006_NISR_WGS1984_20181002.shp"
+shapefile_data <- st_read(shapefile_path)
+
+# Transform CRS to match the desired projection
+shapefile_data <- st_transform(shapefile_data, crs = 32736)
+
+# Join district data with shapefile data
+map_data <- shapefile_data %>%
+  left_join(district_data, by = c("ADM2_EN" = "District"))
+
+# Create a column for labels
+map_data$Label <- paste(map_data$ADM2_EN, "\n", map_data$Count)
+
+# Plot the map
+p_map <- ggplot(map_data) +
+  geom_sf(aes(fill = Count), color = "black", size = 0.2) +
+  geom_sf_text(aes(label = Label), size = 1.7, color = "black") +
+  scale_fill_gradient(
+    low = "white", 
+    high = "#003366", 
+    name = "Total Admissions"
+  ) +
+  theme_minimal() +
+  labs(
+    caption = "Source: Health Information Management System (HMIS), 2024"
+  ) +
+  theme(
+    plot.title = element_text(size = 16, hjust = 0.5),
+    axis.text = element_blank(),
+    legend.position = c(1, 0),
+    axis.ticks = element_blank(),
+    legend.key.size = unit(0.6, "cm"),
+    legend.justification = c(1, 0),
+    legend.direction = "horizontal",
+    legend.title = element_text(size = 7, hjust = 0.5, vjust = 1),
+    plot.caption = element_text(size = 6, hjust = 0),
+    panel.grid = element_blank(),
+    legend.box.margin = margin(t = 20, r = 20, b = 53, l = 0, unit = "pt"),
+    legend.box = "horizontal",
+    axis.title = element_blank()
+  ) +
+  guides(
+    fill = guide_colourbar(
+      title.position = "bottom",
+      title.hjust = 0.5,
+      barheight = unit(0.3, "cm"),
+      barwidth = unit(4, "cm")
+    )
+  )
+
+# Print the plot
+print(p_map)
+
+```
+Admissions by facility name 
+
+```{r}
+# Load the ggplot2 package
+library(ggplot2)
+
+# Create the data frame
+data <- data.frame(
+  Facility_Type = c("District Hospital", "Health Center", "Health Post", "Health Post 2nd Generation",
+                    "Medical Clinic", "Medicalized health Center", "Other facility type", "Prison Clinic",
+                    "Private Hospital", "Provincial Hospital", "Referral Hospital", "Specialised Hospital"),
+  Total_Admissions = c(383365, 268498, 4344, 133, 17853, 10858, 2390, 2718, 20670, 33907, 261005, 1737)
+)
+
+# Calculate the total count
+total_admissions <- sum(data$Total_Admissions)
+
+# Calculate the percentage for each facility type
+data$Percentage <- (data$Total_Admissions / total_admissions) * 100
+
+# Sort the data by Total_Admissions in ascending order
+data_sorted <- data[order(data$Total_Admissions),]
+
+# Create a column to specify label position
+data_sorted$Label_Position <- ifelse(data_sorted$Facility_Type == "District Hospital", "inside", "outside")
+
+# Create the horizontal bar plot with customized label positions
+ggplot(data_sorted, aes(x = Total_Admissions, y = reorder(Facility_Type, Total_Admissions), fill = Total_Admissions)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(
+    label = paste(Total_Admissions, "(", round(Percentage, 2), "%)", sep = ""),
+    hjust = ifelse(Label_Position == "inside", 1.1, -0.1)  # Adjust label positions
+  ), 
+  size = 2.5, color = ifelse(data_sorted$Label_Position == "inside", "white", "black")) +
+  scale_fill_gradient(low = "#a6c8ff", high = "#004a99") +  # Light blue to dark blue gradient
+  theme_minimal() +
+  labs(
+    x = "\nTotal Admissions", 
+    y = "Facility Type",
+    caption = "Source: Health Information Management System (HMIS), 2024"
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text.y = element_text(size = 9, family = "sans"),
+    plot.caption = element_text(size = 7, hjust = 0, family = "sans"),
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+
+```
+
+Average length of stay_Hospitalisation
+```{r}
+
+library(sf)
+library(tidyverse)
+
+district_data <- data.frame(
+  District = c("Bugesera", "Burera", "Gakenke", "Gasabo", "Gatsibo", "Gicumbi", 
+               "Gisagara", "Huye", "Kamonyi", "Karongi", "Kayonza", "Kicukiro", 
+               "Kirehe", "Muhanga", "Musanze", "Ngoma", "Ngororero", "Nyabihu", 
+               "Nyagatare", "Nyamagabe", "Nyamasheke", "Nyanza", "Nyarugenge", 
+               "Nyaruguru", "Rubavu", "Ruhango", "Rulindo", "Rusizi", "Rutsiro", "Rwamagana"),
+  Value = c(1.664, 2.703, 3.66, 3.986, 2.773, 2.735, 4.54, 2.922, 3.56, 3.903, 
+            3.125, 3.169, 2.413, 3.77, 3.01, 1.793, 3.327, 2.703, 2.037, 2.665, 
+            5.698, 8.293, 2.138, 2.173, 2.597, 2.675, 2.503, 1.408, 2.63, 2.442)
+)
+
+# Path to your shapefile
+shapefile_path <- "C:/Users/GK TECH/Downloads/rwa_adm2_2006_NISR_WGS1984_20181002.shp"
+shapefile_data <- st_read(shapefile_path)
+
+# Transform CRS to match the desired projection
+shapefile_data <- st_transform(shapefile_data, crs = 32736)
+
+# Join district data with shapefile data
+map_data <- shapefile_data %>%
+  left_join(district_data, by = c("ADM2_EN" = "District"))
+
+# Create a column for labels
+map_data$Label <- paste(map_data$ADM2_EN, "\n", round(map_data$Value, 2))
+
+# Plot the map
+p_map <- ggplot(map_data) +
+  geom_sf(aes(fill = Value), color = "black", size = 0.2) +
+  geom_sf_text(aes(label = Label), size = 2.1, color = "black") +
+  scale_fill_gradient(
+    low = "white", 
+    high = "#003366", 
+    name = "Average length of stay Hospitalisation(days)
+"
+  ) +
+  theme_minimal() +
+  labs(
+    caption = "Source: Health Information Management System (HMIS), 2024"
+  ) +
+  theme(
+    axis.text = element_blank(),
+    legend.position = c(1, 0),
+    axis.ticks = element_blank(),
+    legend.key.size = unit(0.6, "cm"),
+    legend.text = element_text(size = 10),
+    legend.justification = c(1, 0),
+    legend.direction = "horizontal",
+    legend.title = element_text(size = 8, hjust = 0.5, vjust = 1),
+    plot.caption = element_text(size = 9, hjust = 0),
+    panel.grid = element_blank(),
+    legend.box.margin = margin(t = 20, r = 0, b = 50, l = 40, unit = "pt"),
+    legend.box = "horizontal",
+    axis.title = element_blank()
+  ) +
+  guides(
+    fill = guide_colourbar(
+      title.position = "bottom",
+      title.hjust = 0.5,
+      barheight = unit(0.3, "cm"),
+      barwidth = unit(4, "cm")
+    )
+  )
+
+# Print the plot
+print(p_map)
+
+```
+```{r}
+# Load the ggplot2 package
+library(ggplot2)
+
+# Create the data frame
+data <- data.frame(
+  Facility_Type = c("District Hospital", "Health Center", "Health Post", "Health Post 2nd Generation",
+                    "Medical Clinic", "Medicalized health Center", "Other facility type", "Prison Clinic",
+                    "Private Hospital", "Provincial Hospital", "Referral Hospital", "Specialised Hospital"),
+  Average_Length_Stay = c(4.144444444, 2.104666667, 2.174, 0.326666667, 1.234545455, 2.495,
+                         12.415, 2.223333333, 2.1175, 4.5825, 6.234285714, 4.656666667)
+)
+
+# Sort the data by Average_Length_Stay in ascending order
+data_sorted <- data[order(data$Average_Length_Stay),]
+
+# Create the horizontal bar plot with customized labels
+ggplot(data_sorted, aes(x = Average_Length_Stay, y = reorder(Facility_Type, Average_Length_Stay), fill = Average_Length_Stay)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = round(Average_Length_Stay, 2)), 
+            size = 2.5, color = "black", hjust = 0) +
+  scale_fill_gradient(low = "#a6c8ff", high = "#004a99") +  # Light blue to dark blue gradient
+  theme_minimal() +
+  labs(
+    x = "\nAverage Length of Stay (Hospitalisation)", 
+    y = "Facility Type",
+    caption = "Source: Health Information Management System (HMIS), 2024"
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text.y = element_text(size = 9, family = "sans"),
+    axis.title.y = element_text(size = 9, family = "sans"),
+    axis.title.x = element_text(size = 9, family = "sans"),
+    axis.text.x = element_text(size = 9, family = "sans"),
+    plot.caption = element_text(size = 6, hjust = 0, family = "sans"),
+    plot.title = element_text(size = 12, family = "sans"),
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+
+```
+Surgery
+
+Figure: Minor Surgery Trends by Health Facility Type
+
+```{r}
+
+library(tidyr)
+library(ggplot2)
+library(showtext)
+library(ggtext)
+library(ggrepel)
+library(scales)  
+
+data <- data.frame(
+  Year = c("2019-20", "2020-21", "2021-22", "2022-23", "2023-24"),
+  District_Hospital = c(23561, 28456, 34539, 41877, 41321),
+  Referral_Hospital = c(20147, 24149, 27109, 25509, 33668),
+  Provincial_Hospital = c(2279, 2508, 2434, 2239, 2196),
+  Private_Hospital = c(2090, 1036, 796, 1918, 1755)
+)
+
+# Reshape data for line plot
+data_long <- data %>%
+  pivot_longer(cols = -Year, names_to = "HF_Type", values_to = "Minor_Surgery")
+
+# Set the order of the levels of HF_Type to match the desired legend order
+data_long$HF_Type <- factor(data_long$HF_Type, levels = c("District_Hospital", "Referral_Hospital", "Provincial_Hospital", "Private_Hospital"))
+
+# Plot
+p <- ggplot(data_long, aes(x = Year, y = Minor_Surgery, group = HF_Type, color = HF_Type)) +
+  geom_line(size = 0.7) +                # Line plot
+  geom_point(size = 2) +                 # Points for each year
+  geom_text_repel(                       # Add data labels
+    aes(label = scales::comma(Minor_Surgery)),
+    size = 3,
+    family = "sans",
+    show.legend = FALSE,
+    color = "black"
+  ) +
+  scale_color_manual(                   
+    values = c("lightblue", "#0000CD", "#1E90FF", "darkblue")  # Custom colors
+  ) +
+  labs(
+    caption = "Source : Health Management Information System (HMIS), 2024",
+    x = "\nFiscal Year",
+    y = "Minor Surgeries",
+    color = "Hospital Type"
+  ) +
+  scale_y_continuous(labels = label_comma()) +  # Add commas to y-axis labels
+  theme_minimal() +
+  theme(
+    plot.caption = element_text(
+      family = "sans", size = 10, hjust = 0
+    ),  
+    axis.text = element_text(family = "sans", size = 12),
+    axis.title = element_text(family = "sans", size = 9, face = "bold"),
+    legend.position = "bottom",
+    legend.text = element_text(family = "sans", size = 9),
+    legend.title = element_blank(),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20),
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+# Print the plot
+print(p)
+
+```
+Major Surgery 
+
+```{r}
+library(tidyr)
+library(ggplot2)
+library(showtext)
+library(ggtext)
+library(ggrepel)
+library(scales)  # Load scales package for formatting
+
+# Major surgery data (wide format)
+data_major_surgery <- data.frame(
+  Year = c("2019-20", "2020-21", "2021-22", "2022-23", "2023-24"),
+  District_Hospital = c(53898, 60132, 59206, 66517, 58928),
+  Referral_Hospital = c(55578, 67395, 63303, 57219, 53315),
+  Provincial_Hospital = c(4877, 4816, 6320, 5994, 5576),
+  Private_Hospital = c(4198, 3920, 3901, 5506, 6805),
+  Specialized_Hospital = c(246, 288, 210, 823, 1216)
+)
+
+# Reshape data for line plot
+data_long_major_surgery <- data_major_surgery %>%
+  pivot_longer(cols = -Year, names_to = "HF_Type", values_to = "Major_Surgery")
+
+# Set the order of the levels of HF_Type to match the desired legend order
+data_long_major_surgery$HF_Type <- factor(data_long_major_surgery$HF_Type, 
+                                          levels = c("District_Hospital", "Referral_Hospital", "Provincial_Hospital", "Private_Hospital", "Specialized_Hospital"))
+
+# Plot
+p_major_surgery <- ggplot(data_long_major_surgery, aes(x = Year, y = Major_Surgery, group = HF_Type, color = HF_Type)) +
+  geom_line(size = 0.7) +                # Line plot
+  geom_point(size = 2) +                 # Points for each year
+  geom_text_repel(                       # Add data labels
+    aes(label = scales::comma(Major_Surgery)),
+    size = 3,
+    family = "sans",
+    show.legend = FALSE,
+    color = "black"
+  ) +
+  scale_color_manual(                   
+    values = c("lightblue", "#0000CD",  "#1E90FF", "darkblue","#4169E1")  # Custom colors for the hospital types
+  ) +
+  labs(
+    caption = "Source : Health Management Information System (HMIS), 2024",
+    x = "\nFiscal Year",
+    y = "Major Surgeries",
+    color = "Hospital Type"
+  ) +
+  scale_y_continuous(labels = label_comma()) +  # Add commas to y-axis labels
+  theme_minimal() +
+  theme(
+    plot.caption = element_text(
+      family = "sans", size = 10, hjust = 0
+    ),  
+    axis.text = element_text(family = "sans", size = 10),
+    axis.title = element_text(family = "sans", size = 9, face = "bold"),
+    legend.position = "bottom",
+    legend.text = element_text(family = "sans", size = 8),
+    legend.title = element_blank(),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20),
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+
+# Print the plot
+print(p_major_surgery)
+
+```
+
+
+ Table saved in the word document
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(tidyr)
+library(flextable)
+library(officer)
+
+# Input data
+data <- data.frame(
+  Facility_Type = c(
+    "District Hospital", "Medicalized Health Center", "Other facility type", "Private Hospital", 
+    "Provincial Hospital", "Referral Hospital", "Specialised Hospital"
+  ),
+  `A- Used` = c(3346, 0, 2, 21, 284, 368, 0),
+  `A+ Used` = c(3567, 23, 65, 87, 342, 2677, 29),
+  `AB- Used` = c(429, 0, 0, 1, 32, 48, 0),
+  `AB+ Used` = c(630, 5, 4, 15, 68, 436, 5),
+  `B- Used` = c(218, 0, 0, 18, 20, 255, 0),
+  `B+ Used` = c(4638, 20, 9, 69, 506, 1881, 17),
+  `O- Used` = c(1664, 0, 4, 8, 192, 1537, 1),
+  `O+ Used` = c(12625, 83, 82, 190, 1290, 5744, 78)
+)
+
+# Calculate total sum for each row (facility type)
+data <- data %>%
+  mutate(Total = rowSums(select(., -Facility_Type)))
+
+# Calculate percentages for each column (excluding the Total column)
+data_percent <- data %>%
+  mutate(across(-c(Facility_Type, Total), 
+                ~paste0(., " (", round((. / Total) * 100, 1), "%)"))) 
+
+# Create a flextable
+ft <- flextable(data_percent) %>%
+  autofit() %>%
+  set_caption(caption = "Facility Distribution with Percentages for Blood Types") %>%
+  theme_vanilla()
+
+# Specify the path to save the Word document
+output_path <- "C:/Users/GK TECH/Desktop/PNG_Graphs/Facility_Distribution_with_Percentages.docx"
+
+# Export the flextable to a Word document
+doc <- read_docx() %>%
+  body_add_flextable(ft) %>%
+  body_add_par("Source: Health Management Information System (HMIS), 2024", style = "Normal")
+
+# Save the Word document
+print(doc, target = output_path)
+
+cat("The Word document has been saved to:", output_path, "\n")
+
+
+```
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(showtext)
+library(ggtext)
+library(scales)  # To use label_comma()
+
+data <- data.frame(
+  Blood_Type = c("A- Used", "A+ Used", "AB- Used", "AB+ Used", "B- Used", "B+ Used", "O- Used", "O+ Used"),
+  Count = c(4021, 6790, 510, 1163, 511, 7140, 3406, 20092)
+)
+
+# Calculate percentages
+total_count <- sum(data$Count)
+data <- data %>%
+  mutate(Percentage = round((Count / total_count) * 100, 1)) %>%
+  arrange(desc(Count))  # Sort data in descending order by Count
+
+# Set colors manually for each blood type
+blood_type_colors <- c(
+  "A- Used" = "#4682B4" ,
+  "A+ Used" = "#4682B4" ,
+  "AB- Used" = "#4682B4",
+  "AB+ Used" = "#4682B4",
+  "B- Used" = "#4682B4",
+  "B+ Used" = "#4682B4",
+  "O- Used" = "#4682B4",
+  "O+ Used" = "#4682B4"
+)
+
+# Set fonts
+font_add_google("Outfit", "title_font")
+font_add_google("Cabin", "body_font")
+showtext_auto()
+
+title_font <- "title_font"
+body_font <- "body_font"
+
+p <- ggplot(data, aes(x = reorder(Blood_Type, Count), y = Count, fill = Blood_Type)) +
+  geom_bar(stat = "identity", color = "white", width = 0.6) +  # Bar plot
+  geom_text(
+    aes(label = paste0(label_comma()(Count), " (", label_comma()(Percentage), "%)")),  # Adding commas for thousands
+    vjust = -0.5,
+    family = body_font,
+    size = 4,
+    color = "black"
+  ) +
+  scale_fill_manual(values = blood_type_colors) +  # Assign colors individually
+  labs(
+    caption = "Source: Health Management Information System (HMIS)",
+    x = "Blood Type",
+    y = "Blood Banks",
+    fill = "Blood Type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.title.y = element_text(family = body_font, size = 12),
+    axis.text = element_text(family = body_font, size = 12),
+    axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 1),
+    legend.position = "none", 
+    legend.text = element_text(family = "sans", size = 12),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20),
+    plot.caption = element_text(
+      family = "sans", size = 10, hjust = 0
+    ),
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+
+print(p)
+
+```
+```{r}
+# Load necessary libraries
+library(sf)
+library(tidyverse)
+
+# Define data for the provided counts by district
+district_data <- data.frame(
+  District = c("Bugesera", "Burera", "Gakenke", "Gasabo", "Gatsibo", "Gicumbi", 
+               "Gisagara", "Huye", "Kamonyi", "Karongi", "Kayonza", "Kicukiro", 
+               "Kirehe", "Muhanga", "Musanze", "Ngoma", "Ngororero", "Nyabihu", 
+               "Nyagatare", "Nyamagabe", "Nyamasheke", "Nyanza", "Nyarugenge", 
+               "Nyaruguru", "Rubavu", "Ruhango", "Rulindo", "Rusizi", "Rutsiro", "Rwamagana"),
+  Value = c(1667, 2076, 839, 1917, 1243, 1312, 928, 2952, 364, 914, 
+            1340, 1654, 1684, 1373, 1897, 1023, 666, 222, 1676, 630, 
+            1211, 1038, 8952, 217, 1203, 866, 564, 1461, 341, 1403)
+)
+
+# Path to your shapefile
+shapefile_path <- "C:/Users/GK TECH/Downloads/rwa_adm2_2006_NISR_WGS1984_20181002.shp"
+shapefile_data <- st_read(shapefile_path)
+
+# Transform CRS to match the desired projection
+shapefile_data <- st_transform(shapefile_data, crs = 32736)
+
+# Join district data with shapefile data
+map_data <- shapefile_data %>%
+  left_join(district_data, by = c("ADM2_EN" = "District"))
+
+# Create a column for labels
+map_data$Label <- paste(map_data$ADM2_EN, "\n ", round(map_data$Value, 2))
+
+# Plot the map
+p_map <- ggplot(map_data) +
+  geom_sf(aes(fill = Value), color = "black", size = 0.2) +
+  geom_sf_text(aes(label = Label), size = 3, color = "black") +
+  scale_fill_gradient(
+    low = "white", 
+    high = "#003366", 
+    name = "Count Blood Banks"
+  ) +
+  theme_minimal() +
+  labs(
+    caption = "Source: Health Information Management System (HMIS), 2024"
+  ) +
+  theme(
+    axis.text = element_blank(),
+    legend.position = c(1, 0),
+    axis.ticks = element_blank(),
+    legend.key.size = unit(0.6, "cm"),
+    legend.justification = c(1, 0),
+    legend.direction = "horizontal",
+    legend.title = element_text(size = 10, hjust = 0.5, vjust = 1),
+    plot.caption = element_text(size = 9, hjust = 0),
+    panel.grid = element_blank(),
+    legend.text = element_text(size = 8),
+    legend.box.margin = margin(t = 20, r = 20, b = 53, l = 0, unit = "pt"),
+    legend.box = "horizontal",
+    axis.title = element_blank()
+  ) +
+  guides(
+    fill = guide_colourbar(
+      title.position = "bottom",
+      title.hjust = 0.5,
+      barheight = unit(0.3, "cm"),
+      barwidth = unit(4, "cm")
+    )
+  )
+
+# Save the plot with specified dimensions
+#ggsave("C:/Users/GK TECH/Desktop/PNG_Graphs/district_blood_banks.png", plot = p_map, width = 8, height = 6, dpi = 300)
+
+# Print the plot
+print(p_map)
+
+```
+
+Radiology
+
+```{r}
+
+# Load the ggplot2 package
+library(ggplot2)
+
+# Create the data frame
+data <- data.frame(
+  Type = c("Chest X-ray_MedicalImag_ortho", "Gastroscopy", "Head X-ray_MedicalImag_ortho", 
+           "Hip joint X-ray_MedicalImag_ortho", "Lower limb X-ray_MediacalImag_ortho", 
+           "MH_ECG_Medical Imagery", "MH_Other medical imagery_Medical Imagery", "Other X-Ray", 
+           "Pelvis X-ray_MedicalImag_ortho", "Spine X-ray_MedicalImag_ortho", 
+           "Ultrasound (Echography)", "Upper limb X-ray_MedicalImag_ortho", 
+           "X-Ray Abdomen with dye", "X-Ray Abdomen without preparation", 
+           "X-Ray Bones", "X-Ray Lung"),
+  Count = c(6030, 1152, 21, 120, 9510, 12549, 11200, 8875, 1323, 674, 
+            341825, 3325, 313, 16835, 182544, 103262)
+)
+
+# Calculate the total count
+total_count <- sum(data$Count)
+
+# Calculate the percentage for each type
+data$Percentage <- (data$Count / total_count) * 100
+
+# Sort the data by Count in ascending order
+data_sorted <- data[order(data$Count), ]
+
+# Create a column to specify label position
+data_sorted$Label_Position <- ifelse(data_sorted$Type == "Ultrasound (Echography)", "inside", "outside")
+
+# Create the horizontal bar plot
+ggplot(data_sorted, aes(x = Count, y = reorder(Type, Count), fill = Count)) +
+  geom_bar(stat = "identity") +
+  # Adding data labels with conditional positioning
+  geom_text(aes(
+    label = paste(format(Count, big.mark = ","), "(", round(Percentage, 2), "%)", sep = ""),
+    hjust = ifelse(Label_Position == "inside", 1, -0.1)  # Inside for "Ultrasound (Echography)", outside for others
+  ), 
+  size = 4, color = ifelse(data_sorted$Label_Position == "inside", "white", "black")) +
+  scale_fill_gradient(low = "#a6c8ff", high = "#004a99") +  # Light blue to dark blue gradient
+  theme_minimal() +
+  labs(
+    x = "\nNumber of Procedures", 
+    y = "Procedure Type",
+    caption = "Source: Health Information Management System (HMIS), 2024"
+  ) +
+  theme(
+    legend.position = "none",
+    axis.text.y = element_text(size = 12, family = "sans"),
+    plot.caption = element_text(size = 8, hjust = 0, family = "sans"),
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+
+```
+```{r}
+# Load necessary libraries
+library(sf)
+library(tidyverse)
+
+# Define data for the provided counts by district
+district_data <- data.frame(
+  District = c("Bugesera", "Burera", "Gakenke", "Gasabo", "Gatsibo", "Gicumbi", 
+               "Gisagara", "Huye", "Kamonyi", "Karongi", "Kayonza", "Kicukiro", 
+               "Kirehe", "Muhanga", "Musanze", "Ngoma", "Ngororero", "Nyabihu", 
+               "Nyagatare", "Nyamagabe", "Nyamasheke", "Nyanza", "Nyarugenge", 
+               "Nyaruguru", "Rubavu", "Ruhango", "Rulindo", "Rusizi", "Rutsiro", "Rwamagana"),
+  Value = c(1139479, 639163, 702698, 2762648, 1268502, 949536, 
+            724311, 663589, 566056, 895351, 741307, 1673037, 
+            802883, 786134, 1118975, 757290, 553943, 620393, 
+            927362, 958385, 820881, 763827, 1900829, 530971, 
+            1338161, 716124, 784194, 2461063, 505479, 817456)
+)
+
+# Path to your shapefile
+shapefile_path <- "C:/Users/GK TECH/Downloads/rwa_adm2_2006_NISR_WGS1984_20181002.shp"
+shapefile_data <- st_read(shapefile_path)
+
+# Transform CRS to match the desired projection
+shapefile_data <- st_transform(shapefile_data, crs = 32736)
+
+# Join district data with shapefile data
+map_data <- shapefile_data %>%
+  left_join(district_data, by = c("ADM2_EN" = "District"))
+
+# Create a column for labels with commas for thousands
+map_data$Label <- paste(
+  map_data$ADM2_EN, "\n", 
+  scales::label_comma()(map_data$Value) # Format with commas
+)
+
+# Plot the map
+p_map <- ggplot(map_data) +
+  geom_sf(aes(fill = Value), color = "black", size = 0.2) +
+  geom_sf_text(aes(label = Label), size = 2, color = "black") +
+  scale_fill_gradient(
+    low = "white", 
+    high = "#003366", 
+    name = "Total Laboratory Tests Conducted",
+    labels = scales::label_scientific() # Use scientific notation for legend labels
+  ) +
+  theme_minimal() +
+  labs(
+    caption = "Source: Health Information Management System (HMIS), 2024"
+  ) +
+  theme(
+    plot.title = element_text(size = 9, hjust = 0.5),
+    axis.text = element_blank(),
+    legend.position = c(1, 0),
+    axis.ticks = element_blank(),
+    legend.key.size = unit(0.6, "cm"),
+    legend.justification = c(1, 0),
+    legend.direction = "horizontal",
+    legend.title = element_text(size = 10, hjust = 0.5, vjust = 1),
+    plot.caption = element_text(size = 9, hjust = 0),
+    panel.grid = element_blank(),
+    legend.text = element_text(size = 6),
+    legend.box.margin = margin(t = 20, r = 60, b = 110, l = 0, unit = "pt"),
+    legend.box = "horizontal",
+    axis.title = element_blank()
+  ) +
+  guides(
+    fill = guide_colourbar(
+      title.position = "bottom",
+      title.hjust = 0.5,
+      barheight = unit(0.3, "cm"),
+      barwidth = unit(4, "cm")
+    )
+  )
+
+# Save the plot with specified dimensions
+#ggsave("C:/Users/GK TECH/Desktop/PNG_Graphs/Laboratory_tests_conducted.png", plot = p_map, width = 8, height = 6, dpi = 300)
+
+# Print the plot
+print(p_map)
+
+
+```
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(showtext)
+library(scales)
+
+# Data: Sum of Test Conducted by Row Labels
+data <- data.frame(
+  Row_Labels = c("District Hospital", "Health Center", "Health Post", "Prison Clinic", 
+                 "Private Clinic", "Private Dispensary", "Private Hospital", 
+                 "Provincial Hospital", "Referral Hospital", "Specialised Hospital"),
+  Sum_of_Tests = c(8118401, 13467224, 1473514, 131403, 4257279, 
+                   166894, 399318, 692143, 1156806, 27045)
+)
+
+# Calculate percentages
+total_tests <- sum(data$Sum_of_Tests)
+data <- data %>%
+  mutate(
+    Percentage = round((Sum_of_Tests / total_tests) * 100, 1),  # Calculate percentages
+    Label = paste0(label_comma()(Sum_of_Tests), " (", Percentage, "%)"),  # Format labels
+    hjust = ifelse(Row_Labels == "Health Center", 1.1, -0.2)  # Adjust label position
+  )
+
+# Define colors for the bars
+facility_colors <- rep("#4682B4", nrow(data))  # Using uniform colors
+
+
+title_font <- "title_font"
+body_font <- "sans"
+
+# Plot the data with horizontal bars
+p <- ggplot(data, aes(x = reorder(Row_Labels, Sum_of_Tests), y = Sum_of_Tests, fill = Row_Labels)) +
+  geom_bar(stat = "identity", color = "white", width = 0.6) +  # Horizontal bar plot
+  geom_text(
+    aes(label = Label, hjust = hjust),  # Conditional label positioning
+    vjust = 0.5,  # Center labels vertically
+    family = body_font,
+    size = 4,
+    color = ifelse(data$Row_Labels == "Health Center", "white", "black")  # Adjust text color
+  ) +
+  scale_fill_manual(values = facility_colors) +  # Uniform colors
+  labs(
+    caption = "Source: Health Management Information System (HMIS), 2024",
+    x = "Health Facility Type",
+    y = "\nLaboratory Tests Conducted (%)",
+    fill = NULL
+  ) +
+  coord_flip() +  # Flip the coordinates for horizontal bars
+  theme_minimal() +
+  theme(
+    axis.title.x = element_text(family = "sans", size = 12),
+    axis.title.y = element_text(family = "sans", size = 12),  
+    axis.text = element_text(family = "sans", size = 12),
+    axis.text.y = element_text(hjust = 1),  # Align y-axis labels for horizontal layout
+    legend.position = "none", 
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20),
+    plot.caption = element_text(
+      family = "sans", size = 10, hjust = 0
+    ),
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+
+# Print the plot
+print(p)
+
+# Save the plot to file
+#ggsave("Facility_Tests_Conducted_Horizontal_Adjusted.png", plot = p, width = 8, height = 6, dpi = 300)
+
+```
+
+Opd 
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+library(showtext)
+library(scales)
+
+# Data: Sum of OPD new cases (incl. historic data)
+data <- data.frame(
+  Row_Labels = c("Community-owned health facility", "Dispensary", "District Hospital", 
+                 "Health Center", "Health Post", 
+                 "Medical Clinic", "Medicalized health Center", "Other facility type", 
+                 "Prison Clinic", "Private Hospital", "Provincial Hospital", 
+                 "Referral Hospital", "Specialised Hospital"),
+  Sum_of_OPD_Cases = c(25327, 93245, 1462544, 12968223, 4026335, 1621498, 393654, 11729, 449503, 255244, 151320, 1198128, 7736)
+)
+
+# Calculate percentages
+total_cases <- sum(data$Sum_of_OPD_Cases)
+data <- data %>%
+  mutate(
+    Percentage = round((Sum_of_OPD_Cases / total_cases) * 100, 2),  
+    Label = paste0(label_comma()(Sum_of_OPD_Cases), " (", Percentage, "%)"),  
+    hjust = ifelse(Row_Labels == "Health Center", 1.1, -0.2)  
+  )
+
+# Define colors for the bars
+facility_colors <- rep("#4682B4", nrow(data))  
+
+body_font <- "sans"
+
+p <- ggplot(data, aes(x = reorder(Row_Labels, Sum_of_OPD_Cases), y = Sum_of_OPD_Cases, fill = Row_Labels)) +
+  geom_bar(stat = "identity", color = "white", width = 0.6) +  # Horizontal bar plot
+  geom_text(
+    aes(label = Label, hjust = hjust),  # Conditional label positioning
+    vjust = 0.5,  # Center labels vertically
+    family = body_font,
+    size = 4,
+    color = ifelse(data$Row_Labels == "Health Center", "white", "black")  # Adjust text color
+  ) +
+  scale_fill_manual(values = facility_colors) +  # Uniform colors
+  labs(
+    caption = "Source: Health Management Information System (HMIS), 2024",
+    x = "Health Facility Type",
+    y = "Total Number of OPD Cases (%)",
+    fill = NULL
+  ) +
+  coord_flip() +  # Flip the coordinates for horizontal bars
+  theme_minimal() +
+  theme(
+    axis.title.x = element_text(family = "sans", size = 12),
+    axis.title.y = element_text(family = "sans", size = 12),  
+    axis.text = element_text(family = "sans", size = 12),
+    axis.text.y = element_text(hjust = 1),  # Align y-axis labels for horizontal layout
+    legend.position = "none", 
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20),
+    plot.caption = element_text(
+      family = body_font, size = 10, hjust = 0
+    ),
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+
+# Print the plot
+print(p)
+
+# Save the plot to file
+#ggsave("Facility_OPD_Cases_Horizontal_Adjusted.png", plot = p, width = 8, height = 6, dpi = 300)
+
+```
+
+```{r}
+# Load necessary libraries
+library(sf)
+library(tidyverse)
+
+# Define data for the provided counts by district
+district_data <- data.frame(
+  District = c("Bugesera", "Burera", "Gakenke", "Gasabo", "Gatsibo", "Gicumbi", 
+               "Gisagara", "Huye", "Kamonyi", "Karongi", "Kayonza", "Kicukiro", 
+               "Kirehe", "Muhanga", "Musanze", "Ngoma", "Ngororero", "Nyabihu", 
+               "Nyagatare", "Nyamagabe", "Nyamasheke", "Nyanza", "Nyarugenge", 
+               "Nyaruguru", "Rubavu", "Ruhango", "Rulindo", "Rusizi", "Rutsiro", "Rwamagana"),
+  Value = c(817289, 733004, 859432, 1645474, 930529, 850120, 
+            708182, 829288, 548128, 628952, 577341, 952526, 
+            851300, 716548, 878925, 607818, 380554, 435864, 
+            1045995, 579810, 767036, 626447, 1180941, 548536, 
+            719591, 521195, 677257, 801624, 521151, 723629)
+)
+
+# Path to your shapefile
+shapefile_path <- "C:/Users/GK TECH/Downloads/rwa_adm2_2006_NISR_WGS1984_20181002.shp"
+shapefile_data <- st_read(shapefile_path)
+
+# Transform CRS to match the desired projection
+shapefile_data <- st_transform(shapefile_data, crs = 32736)
+
+# Join district data with shapefile data
+map_data <- shapefile_data %>%
+  left_join(district_data, by = c("ADM2_EN" = "District"))
+
+# Create a column for labels with a small space between district name and count
+map_data$Label <- paste(
+  map_data$ADM2_EN, 
+  scales::label_comma()(map_data$Value), # Format with commas
+  sep = "\n"  # Keep newline but with a small space
+)
+
+# Plot the map with the updated label format
+p_map <- ggplot(map_data) +
+  geom_sf(aes(fill = Value), color = "black", size = 0.2) +
+  geom_sf_text(aes(label = Label), size = 3, color = "black", lineheight = 0.8) +  # Adjust lineheight to reduce space between lines
+  scale_fill_gradient(
+    low = "white", 
+    high = "#003366", 
+    name = "Total OPD Cases",
+    labels = scales::label_comma() # Use comma for legend labels
+  ) +
+  theme_minimal() +
+  labs(
+    caption = "Source: Health Information Management System (HMIS), 2024"
+  ) +
+  theme(
+    plot.title = element_text(size = 9, hjust = 0.5),
+    axis.text = element_blank(),
+    legend.position = c(1, 0),
+    axis.ticks = element_blank(),
+    legend.key.size = unit(0.6, "cm"),
+    legend.justification = c(1, 0),
+    legend.direction = "horizontal",
+    legend.title = element_text(size = 12, hjust = 0.5, vjust = 1),
+    plot.caption = element_text(size = 12, hjust = 0),
+    panel.grid = element_blank(),
+    legend.text = element_text(size = 9),
+    legend.box.margin = margin(t = 20, r = 20, b = 53, l = 0, unit = "pt"),
+    legend.box = "horizontal",
+    axis.title = element_blank()
+  ) +
+  guides(
+    fill = guide_colourbar(
+      title.position = "bottom",
+      title.hjust = 0.5,
+      barheight = unit(0.3, "cm"),
+      barwidth = unit(4, "cm")
+    )
+  )
+
+# Save the plot with specified dimensions
+#ggsave("C:/Users/GK TECH/Desktop/PNG_Graphs/OPD_cases_by_district.png", plot = p_map, width = 8, height = 6, dpi = 300)
+
+# Print the plot
+print(p_map)
+
+
+```
+
+```{r}
+library(tidyverse)
+
+# Define the data
+data <- data.frame(
+  Cadres = c("Medical Doctors"),
+  Medical_Specialists = c(705),
+  Residents = c(317),
+  Fellows = c(70),
+  General_Practionals = c(1219),
+  Dental_Surgeons = c(97),
+  Interns_GP = c(206),
+  Interns_Dental_Surgeons = c(33)
+)
+
+# Reshape data from wide to long format for ggplot
+data_long <- data %>%
+  pivot_longer(cols = -Cadres, 
+               names_to = "Category", 
+               values_to = "Count")
+
+# Plot the bar plot
+p_bar <- ggplot(data_long, aes(x = Category, y = Count, fill = Category)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +
+  labs(x = "Category", y = "Count", title = "Distribution of Medical Personnel by Category") +
+  scale_fill_brewer(palette = "Set3") +
+  theme_minimal() +
+  theme(
+    plot.title = element_text(size = 9, hjust = 0.5),
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 16),
+    plot.caption = element_text(size = 9, hjust = 0),
+    panel.grid = element_blank()
+  )
+
+# Save the plot with specified dimensions
+ggsave("C:/Users/GK TECH/Desktop/PNG_Graphs/Medical_Personnel_Distribution.png", plot = p_bar, width = 8, height = 6, dpi = 300)
+
+# Print the plot
+print(p_bar)
+
+```
+
+
+
+```{r}
+
+data <- data.frame(
+  dataname = c("Gyn Obst", "Intensive care", "Internal Medicine", "Neonatology", "Pediatrics", "Surgery"),
+  District_Hospital = c(64.02, 20.77, 59.74, 66.68, 61.59, 54.8),
+  Provincial_Hospital = c(80.11, 18.24, 47.58, 102.73, 53.74, 53.5),
+  Referral_Hospital = c(83.17, 71.81, 67.56, 59.94, 82.71, 74.19),
+  Private_Hospital = c(1.31, 0.02, 39.18, 4.6, 10.05, 15.02)
+)
+
+# Reshape data for ggplot
+data_long <- pivot_longer(data, cols = -dataname, names_to = "Hospital_Type", values_to = "Value")
+
+# Create the bar plot
+p <- ggplot(data_long, aes(x = Hospital_Type, y = Value, fill = dataname)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = round(Value, 1)), position = position_dodge(width = 0.9), vjust = -0.5, size = 4) +
+  scale_fill_manual(values = c("#0000CD","#003366", "#336699", "#6699CC", "#99CCFF","lightblue")) + # Custom colors
+  theme_minimal() +
+  labs(
+    x = "\nHospital Type",
+    y = "Bed Occupancy Rate(%)",
+    fill = "Service Type",
+    caption = "Source: Health Management Information System (HMIS), 2024"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 12),
+    axis.text.y = element_text(size = 12),
+    axis.title = element_text(size = 14),
+    legend.position = "bottom",
+    legend.title = element_text(size = 14),
+    legend.text = element_text(size = 12),
+    plot.caption = element_text(size = 10, hjust = 0),
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+
+# Save the plot
+# ggsave("hospital_services_barplot.png", plot = p, width = 10, height = 6, dpi = 300)
+
+# Display the plot
+print(p)
+
+```
+```{r}
+# Load necessary library
+library(ggplot2)
+library(tidyr)
+library(stringr)
+
+# Define the data
+data <- data.frame(
+  organisationunitname = c(
+    "King Faisal Hospital HNR", 
+    "CHK(CHUK) HNR", 
+    "Rwanda Military Hospital", 
+    "Butare Chu Hnr (huye)"
+  ),
+  OBGYN = c(79.56, 76.69, 87.26, 68.85),
+  Pediatrics = c(83.01, 98, 90.84, 69.36),
+  Emergency = c(293.66, 128.43, 104.63, 82.6),
+  Intensive_care = c(64.49, 100.3, 70.91, 68.41),
+  Internal_Medicine = c(66.67, 90.9, 98.94, 69.92),
+  Surgery = c(76.09, 97.96, 47.48, 81.97)
+)
+
+# Reshape data for ggplot
+data_long <- pivot_longer(data, cols = -organisationunitname, 
+                          names_to = "Service", values_to = "Value")
+
+# Remove underscores in the 'Service' column
+data_long$Service <- str_replace_all(data_long$Service, "_", " ")
+
+# Create the bar plot
+p <- ggplot(data_long, aes(x = organisationunitname, y = Value, fill = Service)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = round(Value, 1)), 
+            position = position_dodge(width = 0.9), 
+            vjust = -0.5, size = 4) +
+  scale_fill_manual(values = c("#0000CD", "#003366", "#336699", "#6699CC", "#99CCFF", "lightblue")) + 
+  theme_minimal() +
+  labs(
+    x = "\nHospital",
+    y = "Bed Occupancy Rate",
+    fill = "Service Type",
+    caption = "Source: Health Management Information System (HMIS), 2024"
+  ) +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 12),
+    axis.text.y = element_text(size = 12),
+    axis.title = element_text(size = 12),
+    legend.title = element_text(size = 12),
+    legend.position = "bottom",
+    legend.text = element_text(size = 12),
+    plot.caption = element_text(size = 10, hjust = 0),
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+
+# Save the plot
+#ggsave("C:/Users/GK TECH/Desktop/PNG_Graphs/hospital_services_barplot.png", plot = p, width = 10, height = 6, dpi = 300)
+
+print(p)
+
+```
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Create the dataset
+ambulance_data <- data.frame(
+  Deployment_level = c("EMS", "Health Centers", "Hospitals"),
+  Number_of_Ambulances = c(54, 86, 352)
+)
+
+# Calculate percentages
+ambulance_data <- ambulance_data %>%
+  mutate(Percentage = (Number_of_Ambulances / sum(Number_of_Ambulances)) * 100)
+
+# Create the bar plot
+ggplot(ambulance_data, aes(x = Deployment_level, y = Number_of_Ambulances, fill = Deployment_level)) +
+  geom_bar(stat = "identity", width = 0.3) +
+  # Add data labels: Count with Percentage in brackets
+  geom_text(aes(label = paste0(Number_of_Ambulances, " (", round(Percentage, 1), "%)")), 
+            vjust = -0.5, size = 4) +
+  # Define color palette
+  scale_fill_manual(values = c("EMS" = "#6699CC", "Health Centers" = "#6699CC", "Hospitals" = "#6699CC")) +
+  # Add labels and captions
+  labs(
+    x = "\nDeployment Level",
+    y = "Number of Ambulances(%)",
+    fill = "Deployment Level",
+    caption = "Source: Emergency Medical Services (EMS), 2024"
+  ) +
+  # Customize theme
+  theme_minimal() +
+  theme(
+    legend.position = "none",
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12),
+    plot.caption = element_text(size = 9, hjust = 0), 
+    axis.line = element_line(color = "black", size = 0.4)
+  )
+
+# Save the plot
+#ggsave("C:/Users/GK TECH/Desktop/PNG_Graphs/ambulances_by_deployment.png", width = 6, height = 4, dpi = 300)
+
+
+```
+
+
