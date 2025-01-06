@@ -1,0 +1,1627 @@
+---
+title: "Health Sector Performance Charts"
+author: "Martin HABIMANA"
+date: "2025-01-06"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+
+Figure 1: Trend in child routine immunization coverages, FY 2019/20 to FY 2023/24 
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+library(reshape2)
+library(ggrepel)
+
+data <- data.frame(
+  Year = c("2019-20", "2020-21", "2021-22", "2022-23", "2023-24"),
+  BCG = c(95.90, 89.80, 94.20, 97.60, 90.50),
+  Penta1 = c(94.50, 87.80, 91.10, 95.70, 88.00),
+  Penta3 = c(95.10, 86.70, 89.20, 94.50, 87.60),
+  MR1 = c(95.9, 88.1, 86.1, 94.3, 97.4),
+  MR2 = c(89.40, 87.70, 80.20, 84.60, 93.10)
+)
+
+# Melt the data into long format
+data_long <- melt(data, id.vars = "Year", variable.name = "Indicator", value.name = "Coverage")
+
+# Define custom colors
+custom_colors <- c("#1E90FF", "#00008B", "#8FC1E3", "lightblue", "#1E90FF")
+
+# Plot 1: For BCG, Penta1, and Penta3
+plot1 <- ggplot(data_long[data_long$Indicator %in% c("BCG", "Penta1", "Penta3"), ], 
+                aes(x = Year, y = Coverage, color = Indicator, group = Indicator)) +
+  geom_line(size = 1) +
+  geom_point(size = 3) +
+  scale_color_manual(values = custom_colors[1:3]) +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, by = 25)) +
+  theme_minimal(base_family = "sans") +
+  labs(y = "Coverage (%)", x = "Year", color = NULL,caption = "Source : Health Management Information System (HMIS),2024") +  # Removed "Indicator" from legend
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.line = element_line(color = "black", size = 0.5),  # Add x and y axis lines
+    legend.position = "bottom",
+    panel.grid.major = element_line(color = "gray", size = 0.5, linetype = "dotted"),
+    panel.grid.minor = element_blank(),
+    plot.caption = element_text(
+      family = "sans", size = 10, hjust = 0
+    )
+  )
+
+# Plot 2: For MR1 and MR2
+plot2 <- ggplot(data_long[data_long$Indicator %in% c("MR1", "MR2"), ], 
+                aes(x = Year, y = Coverage, color = Indicator, group = Indicator)) +
+  geom_line(size = 1) +
+  geom_point(size = 3) +
+  scale_color_manual(values = custom_colors[4:5]) +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, by = 25)) +
+  theme_minimal(base_family = "sans") +
+  labs(y = NULL, x = "Year", color = NULL,caption = "Source : Health Management Information System (HMIS),2024") +  # Removed "Indicator" from legend
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    axis.line = element_line(color = "black", size = 0.5),  # Add x and y axis lines
+    legend.position = "bottom",
+    panel.grid.major = element_line(color = "gray", size = 0.5, linetype = "dotted"),
+    panel.grid.minor = element_blank(),
+    plot.caption = element_text(
+      family = "sans", size = 10, hjust = 0
+    )
+  )
+
+# Combine plots side by side
+grid.arrange(plot1, plot2, ncol = 2)
+```
+
+Figure 2: Under 5 children treated for pneumonia, diarrhea and malaria, FY 2019/20 – 2023/24 
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(showtext)
+
+# Set font families
+title_font <- "sans"
+body_font <- "sans"
+
+data <- data.frame(
+  Year = c("2019-20", "2020-21", "2021-22", "2022-23", "2023-24"),
+  Pneumonia_HF = c(72, 76, 89, 70, 59),        # U5 children treated in HF for pneumonia
+  Pneumonia_CHWs = c(28, 24, 11, 30, 41),     # U5 children treated by CHWs for pneumonia
+  Diarrhea_HF = c(88, 86, 84, 81, 74),        # U5 children treated in HF for diarrhea
+  Diarrhea_CHWs = c(12, 14, 16, 19, 26),      # U5 children treated by CHWs for diarrhea
+  Malaria_HF = c(65, 64, 64, 69, 67),         # U5 children treated in HF for malaria
+  Malaria_CHWs = c(35, 36, 36, 31, 33)        # U5 children treated by CHWs for malaria
+)
+
+# Reshape data for plotting
+bar_data <- data %>%
+  pivot_longer(cols = -Year, names_to = "Category", values_to = "Rate") %>%
+  separate(Category, into = c("Condition", "Treatment"), sep = "_") %>%
+  mutate(Treatment = ifelse(Treatment == "HF", "U5 children treated in HF", "U5 children treated by CHWs"))
+
+# Ensure 'Year' is treated as an ordered factor with correct formatting
+bar_data$Year <- factor(bar_data$Year, levels = c("2019-20", "2020-21", "2021-22", "2022-23", "2023-24"))
+
+# Define plot texts as per SOP
+caption_text <- "Source: Health Information Management System (HMIS), 2024"
+
+# Plot
+p <- ggplot(bar_data, aes(x = Year, y = Rate, fill = Treatment)) +
+  # Stacked bar plot for each condition across years
+  geom_bar(stat = "identity", position = "stack", color = "white", width = 0.6) +
+  
+  # Data labels
+  geom_text(
+    aes(label = paste0(round(Rate, 1), "%")),
+    position = position_stack(vjust = 0.5),
+    size = 4,
+    family = body_font,
+    fontface = "bold",
+    color = "white"
+  ) +
+  
+  # Scale for coloring
+  scale_fill_manual(
+    values = c(
+      "U5 children treated in HF" = "#4682B4",       # Steel Blue
+      "U5 children treated by CHWs" = "#87CEEB"      # Sky Blue
+    )
+  ) +
+  
+  # Labels and theme
+  labs(
+    caption = caption_text,
+    x = "Fiscal Year",
+    y = "Percentage of U5 Children Treated",
+    fill = NULL  
+  ) +
+  
+  facet_wrap(~Condition, scales = "fixed", ncol = 3) +  
+  
+  # Apply themes to match the SOP, with only x and y-axis lines
+  theme_minimal(base_family = body_font) +
+  theme(
+    # Title and subtitle
+    plot.title = element_text(family = title_font, size = 12, face = "bold", hjust = 0.5, margin = margin(b = 10)),
+    plot.subtitle = element_text(family = body_font, size = 12, hjust = 0.5, color = "grey15", margin = margin(b = 20)),
+    
+    # Axis titles and text
+    axis.title.y = element_text(family = body_font, size = 12, face = "bold"),
+    axis.text.y = element_text(family = body_font, size = 12),
+    axis.title.x = element_text(family = body_font, size = 12, face = "bold"),
+    axis.text.x = element_text(angle = 45, hjust = 1, family = body_font, size = 12),
+    
+    # Legends
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.text = element_text(family = body_font, size = 12),
+    
+    # Caption
+    plot.caption = element_text(family = body_font, size = 10, hjust = 0, color = "black"),
+    
+    # Axis lines
+    axis.line = element_line(color = "black", size = 0.5),
+    
+    # Remove panel grid except for x and y axes
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank(),
+    panel.border = element_blank(),
+    
+    # Background and margins
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+# Print the plot
+print(p)
+```
+
+Figure 6: Number of Under 5 children mortality reported at health facility and community 
+
+```{r}
+data <- data.frame(
+  Fiscal_Year = c("2019-20", "2020-21", "2021-22", "2022-23", "2023-24"),
+  Children_6_59_months = c(1217329, 1418684, 1095131, 1559656, 1536964),
+  U5_dealths_HFs = c(4695, 4407, 4698, 4531, 4959),
+  U5_dealths_community = c(1273, 786, 298, 437, 760)
+)
+
+# Reshape data for side-by-side bar plot
+data_long <- data %>%
+  pivot_longer(cols = c(U5_dealths_HFs, U5_dealths_community),
+               names_to = "Category",
+               values_to = "Deaths")
+
+# Bar plot
+p <- ggplot(data_long) +
+  # Bars for U5 deaths
+  geom_bar(
+    aes(x = Fiscal_Year, y = Deaths, fill = Category),
+    stat = "identity", position = "dodge", color = "white", width = 0.6
+  ) +
+  # Red triangle to indicate total population only above community bars
+  geom_point(
+    data = data_long[data_long$Category == "U5_dealths_community", ],  # Only for community category
+    aes(
+      x = Fiscal_Year,
+      y = Deaths + 5000,  # Position above the bars
+      shape = "Total Under Five Population"
+    ),
+    color = "darkgrey", size = 3, show.legend = TRUE, vjust=-0.5
+  ) +
+  # Total population label at the top of each bar (for Community bars only)
+  geom_text(
+    data = data_long[data_long$Category == "U5_dealths_community", ],  # Only for community category
+    aes(
+      x = Fiscal_Year,
+      y = Deaths + 5500,  # Adjusted position above the bars
+      label = paste0(scales::comma(Children_6_59_months))  # Add commas
+    ),
+    size = 4, color = "black", family = "sans"
+  ) +
+  # Data label for U5 deaths at Health Facilities (only for HF bars)
+  geom_text(
+    data = data_long[data_long$Category == "U5_dealths_HFs", ],  # Only for HF category
+    aes(
+      x = Fiscal_Year,
+      y = Deaths + 100,  # Position slightly above the top of the bars
+      label = scales::comma(Deaths)  # Display number of deaths
+    ),
+    size = 4, color = "black", family = "sans", vjust = -0.5  
+  ) +
+  # Data label for U5 deaths in the community (only for community bars)
+  geom_text(
+    data = data_long[data_long$Category == "U5_dealths_community", ],  # Only for community category
+    aes(
+      x = Fiscal_Year,
+      y = Deaths + 100,  # Position slightly above the top of the bars
+      label = scales::comma(Deaths)  # Display number of deaths
+    ),
+    size = 4, color = "black", family = "sans", vjust = -0.5  
+  ) +
+  scale_fill_manual(
+    values = c(
+      "U5_dealths_HFs" = "#87CEEB", 
+      "U5_dealths_community" = "#4682B4"
+    ),
+    labels = c("U5 Deaths in Community", "U5 Deaths in Health Facilities")
+  ) +
+  scale_shape_manual(
+    values = c("Total Under Five Population" = 17)  # Shape 17 is a triangle
+  ) +
+  # Labels and styling
+  labs(
+    x = "\nFiscal Year",
+    y = "Number of U5 Deaths",
+    fill = "Category",
+    shape = "Indicator",
+    caption = "Source: Health Management Information System (HMIS), 2024"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text = element_text(size = 12),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.text = element_text(size = 10),
+    axis.line = element_line(color = "black", size = 0.4),
+    plot.caption = element_text(size = 10, hjust = 0),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+print(p)
+
+
+```
+
+Figure 7: Proportion of children 6-59 months screened for malnutrition (Weight-for-age) by CHWs 
+
+```{r}
+data <- data.frame(
+  Year = c("2012-13", "2013-14", "2014-15", "2015-16", "2016-17", 
+           "2017-18", "2018-19", "2019-20", "2020-21", "2021-22", 
+           "2022-23", "2023-24"),
+  Children_screened = c(1001955, 1042804, 11166230, 1114858, 1123142,
+                        1158317, 1152442, 1253883, 1438364, 1564784, 
+                        1572170, 1539364),
+  Screening_coverage_rate = c(72, 73, 76, 74, 72, 73, 71, 75, 84, 89, 91, 90)
+)
+
+# Ensure 'Year' is treated as an ordered factor
+data$Year <- factor(data$Year, levels = data$Year)
+
+# Define plot texts as per SOP
+caption_text <- "Source: Health Management Information System (HMIS),2024"
+
+# Plot
+p <- ggplot(data, aes(x = Year, y = Screening_coverage_rate, group = 1)) +
+  # Line for coverage rate
+  geom_line(color = "#4682B4", size = 1) +
+  
+  # Points for each year
+  geom_point(color = "black", size = 2.5) +
+  
+  # Text labels above points
+  geom_text(
+    aes(label = Screening_coverage_rate),
+    vjust = -0.7,
+    size = 5,
+    family = "sans",
+    fontface = "bold",
+    color = "black"
+  ) +
+  
+  # Labels and theme
+  labs(
+    caption = caption_text,
+    x = "Fiscal Year",
+    y = "Screening Coverage Rate (%)"
+  ) +
+  
+  # Apply SOP-compliant theme
+  theme_minimal(base_family = "sans") +
+  theme(
+    axis.line = element_line(color = "black"),
+    plot.caption = element_text(family = "sans", size = 9, hjust = 0),
+    plot.title = element_text(family = "sans", size = 12, face = "bold", hjust = 0.5, margin = margin(b = 10)),
+    axis.title.x = element_text(family = "sans", size = 12, face = "bold"),
+    axis.title.y = element_text(family = "sans", size = 12, face = "bold"),
+    axis.text = element_text(family = "sans", size = 12),
+    
+    # Remove legend
+    legend.position = "none",
+    
+    # Panel grid and background
+    panel.grid.minor = element_blank(),
+    plot.background = element_rect(fill = "white", color = "white"),
+    
+    # Plot margins
+    plot.margin = margin(20, 20, 20, 20)
+  ) +
+  
+  # Y-axis scaling
+  scale_y_continuous(limits = c(0, 100), expand = c(0, 0)) +
+  
+  # X-axis text rotation
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Print the plot
+print(p)
+```
+
+Figure 8: Moderate and severe acute malnutrition cases admitted in nutrition rehabilitation programme at health facilities  
+
+```{r}
+data <- data.frame(
+  Fiscal_Year = c("2021-22", "2022-23", "2023-24"),
+  Children_6_59_months = c(1095131, 1559656, 1536964),
+  Severe_Acute_Malnutrition = c(6507, 8194, 9568),
+  Moderate_Acute_Malnutrition = c(10662, 12201, 24244)
+)
+
+# Data transformation
+data1 <- data %>%
+  mutate(
+    Total_Cases = Severe_Acute_Malnutrition + Moderate_Acute_Malnutrition,
+    Severe_Percentage = round((Severe_Acute_Malnutrition / Children_6_59_months) * 100, 2),
+    Moderate_Percentage = round((Moderate_Acute_Malnutrition / Children_6_59_months) * 100, 2)
+  )
+
+# Bar plot
+p <- ggplot(data1) +
+  # Bars for Moderate Acute Malnutrition
+  geom_bar(
+    aes(x = Fiscal_Year, y = Moderate_Acute_Malnutrition, fill = "Moderate_Acute_Malnutrition"),
+    stat = "identity", position = "stack", color = "white", width = 0.5
+  ) +
+  # Bars for Severe Acute Malnutrition
+  geom_bar(
+    aes(x = Fiscal_Year, y = Severe_Acute_Malnutrition, fill = "Severe_Acute_Malnutrition"),
+    stat = "identity", position = "stack", color = "white", width = 0.5
+  ) +
+  # Red triangle to indicate total population
+  geom_text(
+    aes(
+      x = Fiscal_Year,
+      y = Total_Cases + 2000,  # Position above the bar
+      label = "\u25B2"  # Unicode for triangle
+    ),
+    color = "darkgrey", size = 8, family = "sans"
+  ) +
+  # Total population label at the top of each bar
+  geom_text(
+    aes(
+      x = Fiscal_Year,
+      y = Total_Cases + 5000,  # Adjusted position
+      label = paste0("Under 5 Pop: ", scales::comma(Children_6_59_months))  # Add commas
+    ),
+    size = 4, color = "black", family = "sans"
+  ) +
+  # Labels for Severe Acute Malnutrition with percentages
+  geom_text(
+    aes(
+      x = Fiscal_Year,
+      y = Severe_Acute_Malnutrition / 2,  # Center of Severe bar
+      label = paste0(scales::comma(Severe_Acute_Malnutrition), " (", Severe_Percentage, "%)")
+    ),
+    size = 4, color = "black", family = "sans"
+  ) +
+  # Labels for Moderate Acute Malnutrition with percentages
+  geom_text(
+    aes(
+      x = Fiscal_Year,
+      y = Severe_Acute_Malnutrition + Moderate_Acute_Malnutrition / 2,  # Center of Moderate bar
+      label = paste0(scales::comma(Moderate_Acute_Malnutrition), " (", Moderate_Percentage, "%)")
+    ),
+    size = 4, color = "black", family = "sans"
+  ) +
+  # Custom color scale for the two categories
+  scale_fill_manual(
+    values = c(
+      "Severe_Acute_Malnutrition" = "#87CEEB",
+      "Moderate_Acute_Malnutrition" = "#4682B4"
+    ),
+    labels = c("Moderate Acute Malnutrition", "Severe Acute Malnutrition")
+  ) +
+  # Labels and styling
+  labs(
+    x = "\nFiscal Year",
+    y = "Number of Malnutrition Cases",
+    fill = "Category",
+    caption = "Source: Health Management Information System (HMIS), 2024"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text = element_text(size = 12),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.text = element_text(size = 10),
+    axis.line = element_line(color = "black", size = 0.4),
+    plot.caption = element_text(size = 10, hjust = 0),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+# Display the plot
+print(p)
+
+```
+
+Figure 9: Distribution of GBV cases reported by age group (FY 2023/24) 
+
+```{r}
+data <- data.frame(
+  Age = c("Under 5yrs", "6-17 years", "18-20 years", ">=21 years"),
+  Percentage = c(5, 39, 11, 45)
+)
+
+data$Age <- factor(data$Age, levels = data$Age[order(-data$Percentage)])
+
+g<-ggplot(data, aes(x = Age, y = Percentage)) +
+  geom_bar(stat = "identity", width = 0.4, fill = "#045a8d", color = "white") +
+  
+  geom_text(aes(label = paste0(Percentage, "%")), vjust = -0.1, size = 5, color = "black") +
+  
+  labs(
+    caption = "Source: Health Management Information System (HMIS), 2024",
+    x = "Age Group",
+    y = "Proportion of GBV Cases"
+  ) +
+  
+  # Adjust theme
+  theme_minimal() +
+  theme(
+    axis.text = element_text(size = 12),
+    axis.title = element_text(size = 12),
+    legend.position = "none",  
+    panel.grid.minor = element_blank(),
+    axis.text.x = element_text(margin = margin(t = 5),size=13),
+    axis.line = element_line(color = "black"),
+        plot.caption = element_text(family = "sans", size = 9, hjust = 0)
+  ) +
+  
+  scale_x_discrete(expand = c(0.1, 0))  
+print(g)
+
+```
+
+Figure 12: HIV testing and positivity rate 
+
+```{r}
+# Data Preparation
+data <- data.frame(
+  Fiscal_Year = c("2019-20", "2020-21", "2021-22", "2022-23", "2023-24"),
+  Total_Tested = c(3348337, 2632630, 2286931, 2072366, 1979852),
+  Total_Positive = c(12110, 16190, 16009, 14507, 13296)
+)
+
+data$Positivity_Yield <- (data$Total_Positive / data$Total_Tested) * 100
+
+# Convert Fiscal_Year to a continuous variable for reduced spacing
+data$Year_Index <- seq_along(data$Fiscal_Year)
+
+# Load necessary libraries
+library(ggplot2)
+
+# Plot
+p <- ggplot(data, aes(x = Year_Index, y = Positivity_Yield, group = 1)) +
+  geom_line(color = "skyblue", size = 1.2) +
+  geom_point(color = "black", size = 2.5) +
+  geom_text(
+    aes(label = sprintf("%.2f%%", Positivity_Yield)),
+    vjust = -0.3,
+    size = 5,  # Larger font size for percentage labels
+    family = "sans"
+  ) +
+  scale_x_continuous(
+    breaks = data$Year_Index,
+    labels = data$Fiscal_Year
+  ) +
+  labs(
+    caption = "Source : Health Management Information System (HMIS), 2024",
+    x = "Fiscal Year",
+    y = "HIV Positivity Rate (%)"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.title.x = element_text(size = 16, face = "bold", family = "sans"),
+    axis.title.y = element_text(size = 16, face = "bold", family = "sans"),
+    axis.text = element_text(size = 16, face = "bold", family = "sans"),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20),
+    axis.line = element_line(color = "black", size = 0.4),
+        plot.caption = element_text(family = "sans", size = 9, hjust = -0.1)
+  )
+
+print(p)
+
+```
+
+Figure 13: Testing and Self-Test Kit Distribution in different services by FY 2023/2024 
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(scales)
+library(ggtext)
+
+# Data preparation
+data <- data.frame(
+  Service = c("HTC", "ANC", "PMTCT_Partners", "MATERNITY", "VMMC", "INDEXTESTING"),
+  Total_HIV_Tests = c(1088646, 344746, 323163, 109617, 62863, 62863),
+  HIV_Positive_Cases = c(9211, 1151, 421, 274, 84, 2155)
+) %>%
+  mutate(Positivity_Yield = round((HIV_Positive_Cases / Total_HIV_Tests) * 100, 2))
+
+# Reshape data for plotting
+bar_data <- data %>%
+  pivot_longer(cols = c(Total_HIV_Tests, HIV_Positive_Cases), 
+               names_to = "Category", values_to = "Count") %>%
+  mutate(Category = ifelse(Category == "Total_HIV_Tests", "HIV Total Tests", "HIV Positive Cases"))
+
+# Caption text
+caption_text <- "Source : Health Management Information System (HMIS), 2024"
+
+# Create the plot
+p <- ggplot(bar_data, aes(x = Service, y = Count, fill = Category)) +
+  geom_bar(stat = "identity", position = "stack", color = "white", width = 0.6) +
+  geom_text(
+    aes(label = scales::comma(Count)),
+    position = position_stack(vjust = 0.5),
+    size = 4.5,
+    family = "sans",
+    color = "white", face = "bold"
+  ) +
+  
+  geom_point(
+    data = data, 
+    aes(x = Service, y = Total_HIV_Tests + 5000, shape = "Positivity Yield (%)"), 
+    size = 6, 
+    color = "red", fill = "white",
+    inherit.aes = FALSE
+  ) +
+  
+  # Add labels for positivity yield near the triangles
+  geom_text(
+    data = data, 
+    aes(x = Service, y = Total_HIV_Tests + 15000, label = sprintf("%.2f%%", Positivity_Yield)), 
+    size = 4.5, 
+    family = "sans",
+    color = "red", 
+    inherit.aes = FALSE
+  ) +
+  
+  scale_fill_manual(
+    values = c(
+      "HIV Total Tests" = "#045a8d",
+      "HIV Positive Cases" = "lightblue"
+    )
+  ) +
+  
+  scale_shape_manual(
+    values = c("Positivity Yield (%)" = 24),  # Triangle shape
+    name = NULL
+  ) +
+  
+  labs(
+    caption = caption_text,
+    x = NULL,
+    y = "Log Scale (Count)",
+    fill = NULL
+  ) +
+  
+  scale_y_continuous(
+    trans = "log10", 
+    breaks = scales::trans_breaks("log10", function(x) 10^x),
+    labels = scales::trans_format("log10", scales::math_format(10^.x))
+  ) +
+  
+  # Add axis lines
+  theme_minimal() +
+  theme(
+    axis.text = element_text(family = "sans", size = 12),
+    axis.title.y = element_text(family = "sans", size = 12),
+    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 7),
+    legend.position = "bottom",
+    legend.title = element_text(family = "sans", size = 12, face = "bold"),
+    legend.text = element_text(family = "sans", size = 10),
+    legend.key.size = unit(0.6, "cm"),
+    plot.title = element_textbox_simple(
+      size = 20,
+      family = "sans",
+      face = "bold",
+      hjust = 0.5,
+      lineheight = 1.2,
+      margin = margin(b = 10)
+    ),
+    plot.subtitle = element_text(
+      size = 12, family = "sans", color = "grey15", hjust = 0.5
+    ),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20),
+    axis.line = element_line(color = "black", size = 0.4),
+        plot.caption = element_text(family = "sans", size = 9, hjust = -0.1)
+  )
+
+# Print the plot
+print(p)
+
+```
+
+Figure 14: Viral Load Suppression from 2019 to 2024 
+
+```{r}
+# Libraries
+library(ggplot2)
+
+# Data
+data <- data.frame(
+  Year = c("2019-20", "2020-21", "2021-22", "2022-23", "2023-24"),
+  Percentage = c(90, 92, 93, 97, 97)
+)
+
+# Fonts
+title_font <- "sans"
+body_font <- "sans"
+
+# Visualization
+f <- ggplot(data, aes(x = Year, y = Percentage, group = 1)) +
+  geom_line(color = "#2C77B0", size = 1.5) +            # Line
+  geom_point(color = "#004C8C", size = 3) +             # Points
+  geom_text(aes(label = paste0(Percentage, "%")),       # Text labels
+            vjust = -0.7, size = 6, family = body_font, color = "black") +
+  labs(
+    caption = "Source: Health Management Information System (HMIS),2024",
+    x = "Fiscal Year",
+    y = "Viral Load Suppression (%)"
+  ) +
+  scale_y_continuous(limits = c(0, 100), breaks = c(0, 50, 100)) +  # Y-axis: 0-50-100
+  theme_minimal() +
+  theme(
+    # Titles
+    plot.title = element_text(family = title_font, size = 26, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(family = body_font, size = 22, hjust = 0.5),
+    # Axis
+    axis.title.y = element_text(family = body_font, size = 12, face = "bold"),
+    axis.title.x = element_text(family = body_font, size = 12, face = "bold"),
+    axis.text = element_text(family = body_font, size = 12),       # Add axis lines
+    axis.ticks = element_line(color = "black"),                 # Ticks on axes
+    axis.ticks.length = unit(0.3, "cm"),  
+    plot.margin = margin(20, 20, 20, 20),
+   axis.line = element_line(color = "black", size = 0.4),
+        plot.caption = element_text(family = "sans", size = 9, hjust = -0.1),
+  )
+
+# Display
+print(f)
+
+```
+
+Figure 15: Trend of ART Coverage Among PLHIV from 2019 to 2024 
+
+```{r}
+data <- data.frame(
+  Year = c("2019-2020", "2020-21", "2021-22", "2022-23", "2023-24"),
+  UNAIDS_estimates = c(230424, 223880, 227738, 236527, 229759),
+  PLHIV_on_ART = c(200930, 207089, 214074, 218314, 222604),
+  ART_Coverage = c(87.2, 92.5, 94.0, 92.3, 96.9)
+)
+
+bar_data <- data %>%
+  pivot_longer(cols = c(UNAIDS_estimates, PLHIV_on_ART), names_to = "Type", values_to = "Count")
+
+o <- ggplot() +
+  geom_bar(
+    data = bar_data,
+    aes(x = Year, y = Count, fill = Type),
+    stat = "identity",
+    position = "dodge",
+    color = "white",
+    width = 0.6
+  ) +
+  geom_text(
+    data = bar_data,
+    aes(x = Year, y = Count, label = Count, group = Type),
+    position = position_dodge(width = 0.6),
+    size = 4,
+    color = "black",
+    vjust = -0.5
+  ) +
+  geom_line(
+    data = data,
+    aes(x = Year, y = ART_Coverage * 1000, group = 1, color = "ART Coverage"),
+    size = 0.9
+  ) +
+  geom_point(
+    data = data,
+    aes(x = Year, y = ART_Coverage * 1000, color = "ART Coverage"),
+    size = 3
+  ) +
+  geom_text(
+    data = data,
+    aes(x = Year, y = ART_Coverage * 1000, label = paste0(ART_Coverage, "%")),
+    vjust = -0.5,
+    size = 5,
+    color = "white"
+  ) +
+  scale_y_continuous(
+    name = "UNAIDS Estimates / PLHIV on ART"
+  ) +
+  scale_fill_manual(values = c("UNAIDS_estimates" = "#6699CC", "PLHIV_on_ART" = "#336699")) +
+  scale_color_manual(values = c("ART Coverage" = "black")) +
+  labs(caption="Source : Health Management Information System (HMIS),2024",
+    subtitle = "",
+    x = NULL,
+    fill = "Type",
+    color = NULL
+  ) +
+  theme_minimal() +
+  theme(
+    axis.title.y = element_text(size = 14, face = "bold"),
+    axis.text = element_text(size = 12),
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.text = element_text(size = 13),
+    plot.title = element_text(size = 20, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 14, color = "grey15", hjust = 0.5),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20),
+ axis.line = element_line(color = "black", size = 0.4),
+        plot.caption = element_text(family = "sans", size = 9, hjust = -0.1)
+  )
+
+print(o)
+
+```
+
+Figure 15: Hepatitis B prevention, care and Treatment FY 2023/24 
+
+```{r}
+# Data
+data <- data.frame(
+  Category = c("HBsAg Positive", "HBV Detectable Viral Load", "Eligible and Initiated on Treatment"),
+  Total = c(11463, 1906, 771),
+  Percentage = c(1.48, 0.25, 0.10)
+)
+
+# Sort bars by total values
+data$Category <- reorder(data$Category, -data$Total)
+
+# Fonts
+title_font <- "sans"
+body_font <- "sans"
+
+# Plot
+ggplot(data, aes(x = Category, y = Total, fill = Category)) +
+  geom_bar(stat = "identity", width = 0.4, color = "white", show.legend = FALSE) +
+  
+  # Add percentage labels above the bars
+  geom_text(aes(label = paste0(Percentage, "%")), 
+            vjust = -0.5, size = 5, family = body_font, color = "black") +
+  
+  # Add total labels inside the bars
+  geom_text(aes(label = Total), 
+            vjust = 1.5, size = 4.5, family = body_font, color = "white") +
+  
+  labs(
+    caption = "Source : Health Management Information System (HMIS),2024",
+    x = NULL,
+    y = ""
+  ) +
+  
+  scale_fill_manual(values = c("#5B9BD5", "#5B9BD5", "#5B9BD5")) +
+  
+  theme_minimal() +
+  theme(
+    axis.title.y = element_text(family = body_font, size = 14, face = "bold"),
+    axis.text = element_text(family = body_font, size = 12),
+    axis.text.x = element_text(angle = 0, hjust = 0.5),
+    axis.line = element_line(color = "black", size = 0.4),     # Add axis lines
+    axis.ticks = element_line(color = "black"),               # Ticks on axes
+    axis.ticks.length = unit(0.2, "cm"),                      # Length of ticks
+    # Grid
+    panel.grid = element_blank(),
+    # Caption and margins
+    plot.caption = element_text(family = body_font, size = 9, hjust = -0.1),
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+```
+
+Figure 15: Individuals diagnosed and treated for STIs, 2019-2024 
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(scales)
+
+# Data Preparation
+data <- data.frame(
+  Year = c("2019-20", "2020-21", "2021-22", "2022-23", "2023-24"),
+  Number_Clients_Screened_for_STI = c(3109367, 2523165, 5183918, 4217695, 3883468),
+  Number_Clients_with_Positive_STI = c(108831, 116519, 216342, 223857, 210013)
+) %>%
+  mutate(Percentage_Confirmed_Positive_STI = (Number_Clients_with_Positive_STI / Number_Clients_Screened_for_STI) * 100)
+
+# Pivot Data for Bar Plot
+bar_data <- data %>%
+  pivot_longer(cols = c(Number_Clients_Screened_for_STI, Number_Clients_with_Positive_STI), 
+               names_to = "Category", 
+               values_to = "Count") %>%
+  mutate(Category = factor(Category, levels = c(
+    "Number_Clients_Screened_for_STI", 
+    "Number_Clients_with_Positive_STI"
+  )))
+
+caption_text <- "Source: Health Management Information System (HMIS), 2024"
+
+# Plot
+p <- ggplot() +
+  # Bar plot for screened and positive clients
+  geom_bar(data = bar_data, 
+           aes(x = Year, y = Count, fill = Category), 
+           stat = "identity", 
+           position = "dodge", 
+           color = "white", 
+           width = 0.7) +
+  
+  # Text labels for bar values with commas
+  geom_text(data = bar_data, 
+            aes(x = Year, y = Count, label = scales::comma(Count)), 
+            position = position_dodge(width = 0.7), 
+            family = "sans", 
+            size = 4.5, 
+            color = "black", hjust = 0.5) + 
+  
+  # Line plot for percentage confirmed positive
+  geom_line(data = data, 
+            aes(x = Year, 
+                y = Percentage_Confirmed_Positive_STI * max(bar_data$Count) / max(data$Percentage_Confirmed_Positive_STI), 
+                color = "Confirmed Positive (%)", group = 1), 
+            size = 0.8) +
+  
+  # Points for percentage confirmed positive
+  geom_point(data = data, 
+             aes(x = Year, 
+                 y = Percentage_Confirmed_Positive_STI * max(bar_data$Count) / max(data$Percentage_Confirmed_Positive_STI), 
+                 color = "Confirmed Positive (%)"), 
+             size = 2) +
+  
+  # Text labels for percentage values
+  geom_text(data = data, 
+            aes(x = Year, 
+                y = Percentage_Confirmed_Positive_STI * max(bar_data$Count) / max(data$Percentage_Confirmed_Positive_STI), 
+                label = paste0(round(Percentage_Confirmed_Positive_STI, 2), "%")), 
+            vjust = -0.5, 
+            family = "sans", 
+            size = 4.5, 
+            color = "black") +
+  
+  # Customize y-axis for the unified scale
+  scale_y_continuous(name = "Number of People Screened for STI / Positive") +
+  
+  # Define colors and legend labels
+  scale_fill_manual(
+    name = "Category",
+    values = c(
+      "Number_Clients_Screened_for_STI" = "lightblue", 
+      "Number_Clients_with_Positive_STI" = "#5B9BD5"
+    ),
+    labels = c("Screened", "Positive")
+  ) +
+  scale_color_manual(
+    name = "Category",
+    values = c("Confirmed Positive (%)" = "#1F4E79"),
+    breaks = c("Confirmed Positive (%)"),  # Ensure the percentage line comes last
+    labels = c("Confirmed Positive (%)")
+  ) +
+  
+  # Add axis lines and other adjustments
+  theme_minimal() +
+  theme(
+    axis.title.y = element_text(family = "sans", size = 12, face = "bold"),
+    axis.text = element_text(family = "sans", size = 12),
+    axis.line = element_line(color = "black", size = 0.4),     
+    axis.ticks = element_line(color = "black"),               
+    axis.ticks.length = unit(0.2, "cm"),                      
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.text = element_text(family = "sans", size = 12),
+    plot.caption = element_text(family = "sans", size = 9, hjust = -0.1),
+    plot.title = element_textbox_simple(size = 20, family = "sans", face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 14, family = "sans", color = "grey15", hjust = 0.5),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20)
+  ) +
+  
+  labs(
+    caption = caption_text,
+    x = "Fiscal Year",
+    y = "Count"
+  )
+
+print(p)
+
+```
+
+Figure 15: Individuals diagnosed and treated for TB and Leprosy, 2024 
+
+```{r}
+data <- data.frame(
+  Category = c("Bacteriologically confirmed", "Clinically Diagnosed", "TB cases"),
+  No = c(856, 1758, 2618),
+  Yes = c(5337, 588, 5925)
+)
+
+# Reshape data for grouped bar plot
+library(tidyr)
+bar_data <- data %>%
+  pivot_longer(cols = c(No, Yes), names_to = "Response", values_to = "Count")
+
+title_font <- "sans"
+body_font <- "sans"
+
+# Define caption
+caption_text <- "Source: HMIS"
+
+# Plot
+p <- ggplot(bar_data, aes(x = Category, y = Count, fill = Response)) +
+  # Grouped bar plot
+  geom_bar(stat = "identity", position = position_dodge(width = 0.6), color = "white", width = 0.5) +
+  # Labels on bars
+  geom_text(
+    aes(label = Count),
+    position = position_dodge(width = 0.6),
+    vjust = -0.5,
+    family = body_font,
+    size = 5,
+    color = "black"
+  ) +
+  # Scaling and colors
+  scale_fill_manual(
+    values = c("No" = "#87CEEB", "Yes" = "#4682B4")
+  ) +
+  # Labels and theme
+  labs(
+    x = NULL,
+    y = "Cases",
+    fill = NULL,
+    caption = "Source : Health Management Information System (HMIS),2024"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.title.y = element_text(family = body_font, size = 12, face = "bold"),
+    axis.text = element_text(family = body_font, size = 12, face = "bold"),
+    axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 1),
+     axis.line = element_line(color = "black", size = 0.4), 
+    plot.caption = element_text(family = "sans", size = 9, hjust = -0.1),
+    legend.position = "bottom",
+    legend.text = element_text(family = body_font, size = 12),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+print(p)
+```
+
+Figure 15: Malaria incidence per 1000 persons Year, FY 2017/18 - FY 2023/24 
+
+```{r}
+# Data preparation
+data <- data.frame(
+  Period = c("2017-18", "2018-19", "2019-20", "2020-21", "2021-22", "2022-23", "2023-24"),
+  Malaria_Incidence = c(205, 144, 187, 116, 76, 46, 45)
+)
+
+# Font settings
+body_font <- "body_font"
+
+# Plot
+library(ggplot2)
+
+p <- ggplot(data, aes(x = Period, y = Malaria_Incidence, group = 1)) +
+  geom_line(color = "#4F81BD", size = 1.2) + # Blue line
+  geom_point(color = "#4F81BD", size = 4) + # Points on the line
+  geom_text(
+    aes(label = Malaria_Incidence),
+    vjust = -1, size = 5, family = body_font, color = "black"
+  ) +
+  labs(caption = "Source : Health Management Information System (HMIS),2024",
+    x = "Fiscal Year",
+    y = "Malaria Incidence (per 1000 population)"
+  ) +
+  scale_y_continuous(limits = c(0, 220)) + 
+  theme_minimal() +
+  theme(
+    axis.text = element_text(family = body_font, size = 12, face = "bold"),
+    axis.line = element_line(color = "black", size = 0.4),
+    axis.title.y = element_text(family = body_font, size = 14, face = "bold"),
+     plot.caption = element_text(family = "sans", size = 9, hjust = -0.1),
+    legend.position = "none", # No legend for a single line graph
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+print(p)
+```
+
+Figure 15: Order fill rate (%) from Jan-June 2024 
+
+```{r}
+data <- data.frame(
+  Month = factor(c("Jan-24", "Feb-24", "Mar-24", "Apr-24", "May-24", "Jun-24"), levels = c("Jan-24", "Feb-24", "Mar-24", "Apr-24", "May-24", "Jun-24")),
+  Line_Fill_Rate = c(93, 90, 88, 89, 90, 86),
+  Volume_Fill_Rate = c(88, 83, 85, 84, 86, 81)
+)
+
+# Reshape data for plotting
+data_long <- tidyr::pivot_longer(
+  data,
+  cols = c(Line_Fill_Rate, Volume_Fill_Rate),
+  names_to = "RateType",
+  values_to = "FillRate"
+)
+
+# Define colors
+colors <- c(
+  "Line_Fill_Rate" = "#1F78B4",  # Blue
+  "Volume_Fill_Rate" = "#87CEEB"  # Light Blue
+)
+
+# Plot
+p <- ggplot(data_long, aes(x = Month, y = FillRate, color = RateType, group = RateType)) +
+  # Smooth lines
+  geom_smooth(method = "loess", se = FALSE, size = 1.2) +
+  # Points for each rate type
+  geom_point(size = 3) +
+  # Labels for data points
+  geom_text_repel(
+    aes(label = round(FillRate, 1)),
+    size = 5,
+    family = "sans",
+    color = "black",
+    show.legend = FALSE
+  ) +
+  # Custom colors
+  scale_color_manual(values = colors, labels = c("Line Fill Rate", "Volume Fill Rate")) +
+  # Set y-axis limits starting from 0
+  scale_y_continuous(limits = c(0, 100)) +
+  # Axis labels and caption
+  labs(
+    x = "Month",
+    y = "Fill Rate (%)",
+    caption = "Source: Rwanda Medical Supply,2024"
+  ) +
+  # Theme customization
+  theme_minimal() +
+  theme(
+    axis.text = element_text(family = "sans", size = 12, face = "bold"),
+    axis.title.y = element_text(family = "sans", size = 12, face = "bold", margin = margin(r = 10)),
+    legend.title = element_blank(),
+    axis.line = element_line(color = "black", size = 0.4),
+    legend.position = "bottom",
+    plot.caption = element_text(family = "sans", size = 9, hjust = -0.1),
+    legend.text = element_text(family = "sans", size = 10),
+    plot.margin = margin(20, 20, 20, 20),
+    panel.grid.major = element_line(color = "grey90")
+  ) +
+  # Adjust legend to a single row
+  guides(color = guide_legend(nrow = 1, byrow = TRUE))
+
+print(p)
+```
+
+Figure 15: Proportion of water and electricity in the health facilities, June 2024 
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(ggrepel)
+library(showtext)
+
+
+# Data preparation
+data <- data.frame(
+  Labels = rep(c("Hospitals (N=57)", "HCs (N=517)", "HPs (N=1282)"), each = 2),
+  Percentages = c(100, 100, 97.5, 99.8, 58.7, 78.3),  # Water and Electricity percentages
+  Utility = rep(c("Water", "Electricity"), times = 3)
+)
+
+# Convert Labels and Utility to factors with desired order
+data$Labels <- factor(data$Labels, levels = c("Hospitals (N=57)", "HCs (N=517)", "HPs (N=1282)"))
+data$Utility <- factor(data$Utility, levels = c("Water", "Electricity"))
+
+# Define colors for utilities
+colors <- c("Water" = "#1F78B4", "Electricity" = "#87CEEB")
+
+# Plot
+p <- ggplot(data, aes(x = Labels, y = Percentages, fill = Utility)) +
+  # Side-by-side bars
+  geom_bar(stat = "identity", position = position_dodge(width = 0.6), width = 0.5) +
+  # Labels above bars
+  geom_text_repel(
+    aes(label = paste0(Percentages, "%")),
+    position = position_dodge(width = 0.6),
+    vjust = -0.5,
+    size = 4,
+    family = "sans",
+    color = "black",
+    show.legend = FALSE
+  ) +
+  # Custom colors
+  scale_fill_manual(values = colors, labels = c("Water", "Electricity")) +
+  # Axis labels and caption
+  labs(
+    x = NULL,
+    y = "Coverage (%)",
+    caption = "Source: MoH Environmental Health Desk, 2024"
+  ) +
+  # Theme customization
+  theme_minimal() +
+  theme(axis.line = element_line(color = "black", size = 0.4),
+        plot.caption = element_text(family = "sans", size = 9, hjust = -0.1),
+    axis.text = element_text(family = "sans", size = 12),
+    axis.title.y = element_text(family = "sans", size = 12, margin = margin(r = 10)),
+    legend.title = element_blank(),
+    legend.position = "bottom",
+    legend.text = element_text(family = "sans", size = 10),
+    plot.margin = margin(20, 20, 20, 20),
+    panel.grid.major = element_line(color = "grey90"),
+    panel.grid.minor = element_blank()
+  ) +
+  # Adjust legend to a single row
+  guides(fill = guide_legend(nrow = 1, byrow = TRUE))
+
+print(p)
+```
+
+Figure 15: Blood Collection sessions performed in FY2023/24 
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(ggrepel)
+library(showtext)
+
+data <- data.frame(
+  Location = rep(c("Kigali", "Huye", "Musanze", "Rwamagana", "Karongi", "Total"), each = 2),
+  Sessions = c(484, 538,  # Kigali: Planned, Performed
+               367, 359,  # Huye: Planned, Performed
+               369, 382,  # Musanze: Planned, Performed
+               358, 326,  # Rwamagana: Planned, Performed
+               379, 335,  # Karongi: Planned, Performed
+               1957, 1940), # Total: Planned, Performed
+  Type = rep(c("Planned", "Performed"), times = 6)
+)
+
+# Convert Location to a factor to control the order in the plot
+data$Location <- factor(data$Location, levels = c("Kigali", "Huye", "Musanze", "Rwamagana", "Karongi", "Total"))
+
+# Reorder Type to ensure "Planned" comes first
+data$Type <- factor(data$Type, levels = c("Planned", "Performed"))
+
+# Define custom colors
+colors <- c("Planned" = "lightblue", "Performed" = "#1F77B4")
+
+# Create the side-by-side bar plot
+p <- ggplot(data, aes(x = Location, y = Sessions, fill = Type)) +
+  # Bars
+  geom_bar(stat = "identity", position = position_dodge(width = 0.6), width = 0.5) +
+  # Labels
+  geom_text(
+    aes(label = Sessions),
+    position = position_dodge(width = 0.6),
+    vjust = -0.5,
+    size = 4,
+    family = "body_font"
+  ) +
+  # Custom colors
+  scale_fill_manual(values = colors) +
+  # Y-axis limits starting from zero
+  scale_y_continuous(expand = expansion(mult = c(0, 0.1)), limits = c(0, 2000)) +
+  # Axis labels and caption
+  labs(
+    x = NULL,  # Remove x-axis label
+    y = "Number of Sessions",
+    caption = "Source: Health Management Information System (HMIS), 2024"
+  ) +
+  # Theme customization
+  theme_minimal() +
+  theme(axis.line = element_line(color = "black", size = 0.4),
+        plot.caption = element_text(family = "sans", size = 9, hjust = -0.1),
+    axis.text = element_text(family = "sans", size = 12),
+    axis.title.y = element_text(family = "sans", size = 12, margin = margin(r = 10)),
+    legend.title = element_blank(),
+    legend.position = "bottom",
+    legend.text = element_text(family = "sans", size = 10),
+    plot.margin = margin(20, 20, 20, 20),
+    panel.grid.major = element_line(color = "grey90")
+  ) +
+  # Adjust legend to a single row
+  guides(fill = guide_legend(nrow = 1, byrow = TRUE))
+
+print(p)
+```
+
+Figure 15: Annual trends of OPD visits per capita compared to population  
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(tidyr)
+
+# Create the data frame
+data <- data.frame(
+  Fiscal_Year = c("2019-20", "2020-21", "2021-22", "2022-23", "2023-24"),
+  Total_Population_Million = c(12.52, 12.81, 13.10, 13.37, 13.65),
+  OPD_Per_Capita_Utilization_Ratio = c(1.51, 1.55, 1.62, 1.63, 1.51)
+)
+
+# Plot
+ggplot(data, aes(x = Fiscal_Year)) +
+  
+  # Bar plot for Total Population (Million)
+  geom_bar(aes(y = Total_Population_Million, fill = "Total Population"), 
+           stat = "identity", position = "dodge", width = 0.4) +
+  
+  # Line plot for OPD Per Capita Utilization (Ratio)
+  geom_line(aes(y = OPD_Per_Capita_Utilization_Ratio, 
+                group = 1, color = "OPD Per Capita Utilization"), 
+            size = 1) +
+  
+  # Points for OPD Per Capita Utilization (Ratio)
+  geom_point(aes(y = OPD_Per_Capita_Utilization_Ratio, 
+                 color = "OPD Per Capita Utilization"), size = 2) +
+  
+  # Text labels for OPD Per Capita Utilization (Ratio)
+  geom_text(aes(y = OPD_Per_Capita_Utilization_Ratio, 
+                label = round(OPD_Per_Capita_Utilization_Ratio, 2)),
+            vjust = -0.5, size = 5, color = "black") +
+  
+  # Text labels on bars for Total Population
+  geom_text(aes(y = Total_Population_Million, 
+                label = round(Total_Population_Million, 2)), 
+            position = position_dodge(width = 0.7), 
+            vjust = -0.2, size = 5, color = "black") +
+  
+  # Customize y-axis for Total Population (Million)
+  scale_y_continuous(name = "Total Population (Million)") +
+  
+  # Color settings for the bars and line
+  scale_fill_manual(values = c("Total Population" = "#74a9cf")) +
+  scale_color_manual(values = c("OPD Per Capita Utilization" = "#1F4E79")) +
+  
+  # Labels and theme customization
+  labs(
+    x = "Fiscal Year", 
+    y = NULL, 
+    fill = NULL,  # Remove the "Legend" label from the fill legend
+    color = NULL, # Remove the "Legend" label from the color legend
+    caption = "Source: Health Management Information System (HMIS), 2024"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.line = element_line(color = "black", size = 0.4),
+    plot.caption = element_text(family = "sans", size = 9, hjust = -0.1),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.text = element_text(size = 12, face = "bold"),
+    legend.position = "bottom",
+    plot.title = element_text(size = 14, face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(size = 12, hjust = 0.5),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20)
+  )
+```
+
+Figure : Trend of Bed occupancy Rate from FY2018/19 to 2023/24 
+
+```{r}
+library(ggplot2)
+library(reshape2)
+library(stringr)
+
+# Prepare the data
+fiscal_years <- c("2021-22", "2022-23", "2023-24")
+provincial_hospital <- c(63.70, 65.00, 62.10)
+health_center <- c(18.30, 16.90, 20.40)
+referral_hospital <- c(71.60, 73.10, 77.10)
+specialized_hospital <- c(86.20, 53.80, 45.40)
+private_facilities <- c(17.20, 16.00, 22.40)
+national_bed_occupancy <- c(51.40, 45.00, 45.50)
+
+# Combine data into a long format
+data <- data.frame(
+  Fiscal_Year = fiscal_years,
+  Provincial_and_District_Hospital = provincial_hospital,
+  Health_Center = health_center,
+  Referral_Hospital = referral_hospital,
+  Specialized_Hospital = specialized_hospital,
+  Private_Facilities = private_facilities,
+  National_Bed_Occupancy = national_bed_occupancy
+)
+
+data_long <- melt(data, id.vars = "Fiscal_Year", variable.name = "Facility_Type", value.name = "Occupancy_Rate")
+
+# Remove underscores for better legend display
+data_long$Facility_Type <- str_replace_all(data_long$Facility_Type, "_", " ")
+
+# Sort by Fiscal_Year and Occupancy_Rate
+data_long <- data_long[order(data_long$Fiscal_Year, -data_long$Occupancy_Rate), ]
+
+# Convert Facility_Type to a factor with the correct order
+data_long$Facility_Type <- factor(data_long$Facility_Type, levels = unique(data_long$Facility_Type))
+
+# Plot
+p <- ggplot(data_long, aes(x = Fiscal_Year, y = Occupancy_Rate, fill = Facility_Type)) +
+  geom_bar(stat = "identity", position = "dodge", color = "white", width = 0.7) +
+  geom_text(
+    aes(label = paste0(Occupancy_Rate, "%")),
+    position = position_dodge(width = 0.8),
+    vjust = -0.3,
+    family = body_font,
+    size = 4.5,
+    color = "black"
+  ) +
+  scale_fill_manual(
+    values = c(
+      "Provincial and District Hospital" = "#87CEEB",
+      "Health Center" = "darkblue",
+      "Referral Hospital" = "lightblue",
+      "Specialized Hospital" = "#4682B4",
+      "Private Facilities" = "#1E90FF",
+      "National Bed Occupancy" = "#0000FF"
+    )
+  ) +
+  labs(
+    x = "\nFiscal Year",
+    y = "Bed Occupancy Rate (%)",
+    fill = "Facility Type",
+    caption = "Source : Health Management Information System (HMIS), 2024"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.line = element_line(color = "black", size = 0.4),
+    plot.caption = element_text(family = "sans", size = 9, hjust = -0.1),
+    axis.title.y = element_text(family = body_font, size = 12, face = "bold"),
+    axis.title.x = element_text(family = body_font, size = 12, face = "bold"),
+    axis.text = element_text(family = body_font, size = 11),
+    axis.text.x = element_text(family = body_font, size = 11, face = "bold"),
+    legend.position = "bottom",
+    legend.title = element_text(family = body_font, size = 12),
+    legend.text = element_text(family = body_font, size = 11),
+    plot.background = element_rect(fill = "white", color = "white"),
+    plot.margin = margin(20, 20, 20, 20)
+  )
+
+# Print the plot
+print(p)
+#ggsave("C:/Users/GK TECH/Desktop/PNG_Graphs/BedOccupancy1.png", plot = p, width = 6, height = 4, dpi = 300)
+
+```
+
+Figure 15: Bed occupancy Rate by Department for the Fiscal Year 2023-24 
+
+```{r}
+categories <- c("District Hospital", "Provincial Hospital", "Referral Hospital")
+departments <- c("Internal Medicine", "Gyn-bstetric", "Pediatrics", 
+                 "Neonatology", "Emergency", "Intensive Care", "Surgery")
+
+data <- data.frame(
+  Category = rep(categories, each = length(departments)),
+  Department = factor(rep(departments, times = length(categories)), levels = departments),
+  Coverage = c(59.7, 63.9, 61.6, 66.2, 0.0, 20.8, 54.7,
+               47.6, 80.1, 53.7, 102.7, 0.0, 18.2, 53.5,
+               67.6, 83.2, 82.7, 59.9, 133.9, 71.8, 74.2)
+)
+
+# Define custom colors
+colors <- c("#00008B", "skyblue", "steelblue", 
+            "#1E90FF",  "#0000CD", "#1F78D0", "#08519C")
+
+# Create the plot
+p_map<-ggplot(data, aes(x = Category, y = Coverage, fill = Department)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), width = 0.7) +
+  geom_text(
+    aes(label = ifelse(Coverage > 0, round(Coverage, 1), "")), # Add labels for non-zero values
+    position = position_dodge(width = 0.8), 
+    vjust = -0.5,  # Position above the bars
+    size = 4       # Adjust font size for the text
+  ) +
+  ylim(0, max(data$Coverage) + 10) +  # Add extra space above the highest value
+  scale_fill_manual(values = colors) +
+  theme_minimal(base_family = "sans") +  # Apply sans-serif font
+  theme(axis.line = element_line(color = "black", size = 0.4),
+        plot.caption = element_text(family = "sans", size = 9, hjust = -0.1),
+        
+    axis.text = element_text(size = 10, color = "black"),
+    axis.title = element_text(size = 12, color = "black"),
+    legend.position = "bottom",
+    legend.title = element_text(size = 10, face = "bold"),
+    legend.text = element_text(size = 9),
+    plot.margin = margin(15, 10, 30, 10) # Add space for the source
+  ) +
+  labs(
+    x = "\nInstitution Type",
+    y = "Bed Occupancy (%)",
+    fill = "Department",
+    caption = "Source: Health Management Information System(HMIS), 2024"
+  ) +
+  # Adjust legend position below the plot
+  guides(fill = guide_legend(nrow = 2, byrow = TRUE))
+print(p_map)
+
+#ggsave("C:/Users/GK TECH/Desktop/PNG_Graphs/BedOccupancy.png", plot = p_map, width = 8, height = 6, dpi = 300)
+```
+
+
+Figure 28: Surgical Volume
+
+```{r}
+data <- data.frame(
+  Period = c("2019-20", "2020-21", "2021-22", "2022-23", "2023-24"),
+  Values = c(1453.9, 1609.2, 1675.2, 1733.1, 1816.2)
+)
+
+# Line plot
+p <- ggplot(data, aes(x = Period, y = Values, group = 1)) +
+  geom_line(color = "#003366", size = 1) +       # Line settings
+  geom_point(size = 3, color = "#003366") +      # Points on the line
+  geom_text(
+    aes(label = Values), 
+    vjust = -1, 
+    size = 5, 
+    color = "black", 
+    family = "sans"
+  ) +scale_y_continuous(
+    limits = c(0, 1900))+
+  labs(
+    x = "\nFiscal Year",
+    y = "Surgical Volume per 100,000 Population",
+    caption = "Source: Health Information System Management(HMIS), 2024"
+  ) +
+  theme_minimal() +
+  theme(
+    text = element_text(family = "sans"),
+    axis.title.y = element_text(size = 12, face = "bold"),
+    axis.title.X = element_text(size = 12, face = "bold"),
+    axis.text = element_text(size = 12, face = "bold"),
+    panel.grid.minor = element_blank(),
+    axis.line = element_line(color = "black", size = 0.4),
+    plot.caption = element_text(size = 10, hjust = 0)
+  )
+
+
+
+print(p)
+```
+
+Figure : Average time VS target time indicators in 2023/24 
+
+```{r}
+# Load required libraries
+library(ggplot2)
+library(dplyr)
+
+# Data
+categories <- c(
+  "Alert time",
+  "Departure time",
+  "On-scene time",
+  "Arrival at the health facility\n(Golden hour)"
+)
+target_times <- c(3.15, 1.15, 10.15, 60)
+average_times <- c(1.72, 1.39, 14.24, 62.75)
+
+# Combine data into a data frame
+data <- data.frame(
+  Category = rep(categories, 2),
+  Time = c(target_times, average_times),
+  Type = rep(c("Target Time (Min)", "Average Time (Min)"), each = length(categories))
+)
+
+# Rearrange 'Type' factor levels to ensure the order of bars
+data$Type <- factor(data$Type, levels = c("Target Time (Min)", "Average Time (Min)"))
+
+# Rearrange 'Category' factor levels to ensure the specified order
+data$Category <- factor(data$Category, levels = categories)
+
+# Define colors
+target_color <- "#87ceeb"  # Dark blue
+average_color <- "#1f77b4"  # Sky blue
+
+# Plot
+ggplot(data, aes(x = Category, y = Time, fill = Type)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), width = 0.7) +
+  geom_text(aes(label = sprintf("%.2f", Time)), 
+            position = position_dodge(width = 0.8), 
+            vjust = -0.5, 
+            size = 4.5, 
+            color = "black", 
+            fontface = "bold") +
+  scale_fill_manual(values = c("Target Time (Min)" = target_color, 
+                               "Average Time (Min)" = average_color)) +
+  labs(
+    x = "Time Category",
+    y = "Time (Minutes)",
+    caption = "Source | Emergency Medical System (EMS), 2024"
+  ) +
+  theme_minimal(base_family = "sans") +
+  theme(
+    axis.text.x = element_text(size = 12),
+    axis.text.y = element_text(size = 12),
+    axis.title = element_text(size = 12),
+    axis.line = element_line(color = "black", size = 0.4),
+    legend.position = "bottom",
+    legend.text = element_text(size = 10),
+    plot.caption = element_text(size = 10, hjust = 0)
+  ) 
+
+```
+
+Figure 30: PBF allocated to the facilities and community program, 2023/24 
+
+```{r}
+data <- data.frame(
+  Category = c("Clinical Facilities", 
+               "Community Health Program", 
+               "PBF Disbursed"),
+  OB = c(7.22, 1.30, 8.53),
+  DPs = c(3.93, 3.77, 7.70),
+  Combined = c(11.16, 5.07, 16.23)
+)
+data_melted <- melt(data, id.vars = "Category", 
+                    variable.name = "Source_of_Fund", 
+                    value.name = "Amount")
+
+# Define custom colors for the funding sources
+source_colors <- c(
+  "OB" = "lightblue",       # Dark blue
+  "DPs" = "#1f77b4",      # Orange
+  "Combined" = "#00008B" # Green
+)
+
+# Plot
+plot <- ggplot(data_melted, aes(x = Category, y = Amount, fill = Source_of_Fund)) +
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), width = 0.7) +  # Adjust dodge and bar width
+  geom_text(aes(label = sprintf("%.2f", Amount)), 
+            position = position_dodge(width = 0.8), 
+            vjust = -0.5, 
+            size = 4.5, 
+            color = "black") +
+  scale_fill_manual(values = source_colors, labels = c(
+    "OB" = "Ordinary Budget (OB)",
+    "DPs" = "Development Partners (DPs)",
+    "Combined" = "Source of Funds (Combined)"
+  )) +
+  labs(
+    x = "\nHealth Facilities Category",
+    y = "Amount (Rwf Billion)",
+    fill = "Source of Fund",
+    caption = "Source: PBF Desk (MOH), 2024"
+  ) +
+  theme_minimal(base_family = "sans") +
+  theme(axis.line = element_line(color = "black", size = 0.4),
+        plot.caption = element_text(family = "sans", size = 9, hjust = 0),
+    axis.text.x = element_text(size = 12),  # Increase x-axis label size
+    axis.text.y = element_text(size = 12),  # Increase y-axis label size
+    axis.title = element_text(size = 11),  # Increase axis title size
+    legend.position = "bottom",            # Place legend at the bottom
+    legend.title = element_blank(),        # Remove legend title
+    legend.text = element_text(size = 10),  # Adjust legend text size
+  )
+
+print(plot)
+```
+
